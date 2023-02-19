@@ -14,7 +14,7 @@ fn inches(inches: f32) -> f32 {
     inches * 25.4
 }
 
-pub fn create_pdf(fountain_doc: FarceDocument) -> Result<(), String> {
+pub fn create_pdf(fountain_doc: FarceDocument, output_filename: &str) -> Result<(), String> {
     let has_title_page = fountain_doc.has_title_page();
     let exe_path = match env::current_exe() {
         Ok(exe_path) => exe_path,
@@ -136,7 +136,7 @@ pub fn create_pdf(fountain_doc: FarceDocument) -> Result<(), String> {
             }
         }
     }
-    doc.render_to_file("./test_working.pdf")
+    doc.render_to_file(output_filename)
         .expect("Failed to write output file");
     Ok(())
 }

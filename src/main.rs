@@ -3,6 +3,7 @@ use crate::pdf::create_pdf;
 use std::env;
 use std::fs;
 use std::process::exit;
+use std::path::Path;
 mod parsing;
 mod pdf;
 
@@ -11,7 +12,6 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let _input;
     let input = match args.len() {
-        //1 => INPUT,
         2 => {
             match fs::read_to_string(&args[1]) {
                 Ok(s) => {
@@ -26,6 +26,7 @@ fn main() {
         }
         _ => {
             eprintln!("Couldn't parse command line arguments");
+            eprintln!("Usage: farce my-screenplay.fountain");
             exit(1)
         }
     };
@@ -65,7 +66,13 @@ fn main() {
                 println!();
             }
             println!(" ==== Remaining input ====\n\n {}", remaining_input);
-            match create_pdf(document) {
+
+            let path = Path::new(&args[1]);
+            let file_stem = path.file_stem().unwrap().to_str().unwrap();
+            let output_filename = format!("{}.pdf", file_stem);
+
+            println!("Writing PDF to {}", output_filename);
+            match create_pdf(document, &output_filename) {
                 Ok(()) => {},
                 Err(e) => {
                     eprintln!("Couldn't generate PDF ({})", e);
