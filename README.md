@@ -13,5 +13,6 @@ NB It looks for fonts under the directory the executable's in, so if you try to 
     cargo build
     cp target/debug/farce ./
     ./farce my-screenplay.fountain
+    # PDF will be written to my-screenplay.pdf
 
 Maybe at some point I'll release some binaries with the fonts in the right place.
