@@ -1,21 +1,14 @@
-use nom::bytes::complete::take_while_m_n;
-use nom::sequence::pair;
-use nom::sequence::separated_pair;
-use nom::AsChar;
-use std::collections::HashMap;
-
-use nom::character::complete::line_ending;
-use nom::character::complete::not_line_ending;
 use nom::{
     branch::alt,
-    bytes::complete::{is_not, tag, take_while, take_while1},
-    character::complete::{char, multispace0, space0, space1},
+    bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
+    character::complete::{char, line_ending, not_line_ending, multispace0, space0, space1},
     combinator::{map, opt},
-    multi::{many0, many1},
-    sequence::{delimited, terminated},
+    multi::many1,
+    sequence::{delimited, pair, separated_pair, terminated},
     IResult,
 };
 use std::fmt;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Dialogue {
@@ -98,10 +91,9 @@ impl FarceDocument {
                 Some(author) => Some(author.to_string()),
                 None => None,
             },
-            None => None
+            None => None,
         }
     }
-
 
     pub fn has_title_page(&self) -> bool {
         match &self.title_page {
@@ -123,7 +115,7 @@ fn truncate_string(ss: &String, num_chars: Option<usize>) -> String {
 
 fn is_character_name_char(c: char) -> bool {
     // For now let's say speaker names can only have caps and spaces
-    c.is_ascii_uppercase() || c == ' ' || c.is_dec_digit()
+    c.is_ascii_uppercase() || c == ' ' || c.is_ascii_digit()
 }
 
 fn parse_character_name(input: &str) -> IResult<&str, (&str, Option<&str>)> {

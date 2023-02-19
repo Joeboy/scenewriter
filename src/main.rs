@@ -26,8 +26,7 @@ fn main() {
         }
         _ => {
             eprintln!("Couldn't parse command line arguments");
-            exit(1);
-            ""
+            exit(1)
         }
     };
 
