@@ -1,5 +1,5 @@
-use crate::parsing::FuntDocument;
-use crate::parsing::FuntElement;
+use crate::parsing::FarceDocument;
+use crate::parsing::FarceElement;
 use genpdf::elements::Paragraph;
 use genpdf::Alignment;
 use genpdf::Element;
@@ -14,7 +14,7 @@ fn inches(inches: f32) -> f32 {
     inches * 25.4
 }
 
-pub fn create_pdf(fountain_doc: FuntDocument) -> Result<(), String> {
+pub fn create_pdf(fountain_doc: FarceDocument) -> Result<(), String> {
     let has_title_page = fountain_doc.has_title_page();
     let exe_path = match env::current_exe() {
         Ok(exe_path) => exe_path,
@@ -106,11 +106,11 @@ pub fn create_pdf(fountain_doc: FuntDocument) -> Result<(), String> {
     // );
     for element in fountain_doc.elements {
         match element {
-            FuntElement::FAction(text) => {
+            FarceElement::FAction(text) => {
                 doc.push(elements::Paragraph::new(text));
                 doc.push(elements::Break::new(1));
             }
-            FuntElement::FDialogue(dialogue) => {
+            FarceElement::FDialogue(dialogue) => {
                 doc.push(
                     Paragraph::new(match dialogue.character_extension {
                         Some(character_extension) => {
@@ -123,7 +123,7 @@ pub fn create_pdf(fountain_doc: FuntDocument) -> Result<(), String> {
                 doc.push(Paragraph::new(dialogue.text).padded((0.0, inches(1.0), 0.0, inches(1.5))));
                 doc.push(elements::Break::new(1));
             }
-            FuntElement::FSceneHeading(scene_heading) => {
+            FarceElement::FSceneHeading(scene_heading) => {
                 doc.push(
                     elements::Paragraph::default().styled_string(
                         format!("{}. {}", scene_heading.int_or_ext, scene_heading.text),
@@ -131,7 +131,7 @@ pub fn create_pdf(fountain_doc: FuntDocument) -> Result<(), String> {
                 ));
                 doc.push(elements::Break::new(1));
             }
-            FuntElement::FPageBreak => {
+            FarceElement::FPageBreak => {
                 doc.push(elements::PageBreak::new());
             }
         }

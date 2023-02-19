@@ -1,4 +1,4 @@
-use crate::parsing::FuntElement;
+use crate::parsing::FarceElement;
 use crate::pdf::create_pdf;
 use std::env;
 use std::fs;
@@ -43,7 +43,7 @@ fn main() {
             }
             for element in &document.elements {
                 match element {
-                    FuntElement::FDialogue(dialogue) => {
+                    FarceElement::FDialogue(dialogue) => {
                         match &dialogue.character_extension {
                             Some(extension) => {
                                 println!("Dialogue: {} (({}))", dialogue.character_name, extension)
@@ -53,13 +53,13 @@ fn main() {
                             }
                         };
                     }
-                    FuntElement::FSceneHeading(text) => {
+                    FarceElement::FSceneHeading(text) => {
                         println!("Scene heading: {}", text);
                     }
-                    FuntElement::FAction(text) => {
+                    FarceElement::FAction(text) => {
                         println!("Action: {}", text);
                     }
-                    FuntElement::FPageBreak => {
+                    FarceElement::FPageBreak => {
                         println!("<Page Break>");
                     }
                 };

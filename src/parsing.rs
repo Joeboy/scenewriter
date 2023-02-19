@@ -53,7 +53,7 @@ impl fmt::Display for SceneHeading {
 }
 
 #[derive(Debug)]
-pub enum FuntElement {
+pub enum FarceElement {
     FDialogue(Dialogue),
     FSceneHeading(SceneHeading),
     FAction(String),
@@ -66,12 +66,12 @@ pub struct TitlePage {
 }
 
 #[derive(Debug)]
-pub struct FuntDocument {
+pub struct FarceDocument {
     pub title_page: Option<TitlePage>,
-    pub elements: Vec<FuntElement>,
+    pub elements: Vec<FarceElement>,
 }
 
-impl FuntDocument {
+impl FarceDocument {
     pub fn get_title(&self) -> String {
         match &self.title_page {
             Some(title_page) => match title_page.fields.get("Title") {
@@ -150,7 +150,7 @@ fn consume_whitespace(input: &str) -> IResult<&str, &str> {
     Ok((i, whitespace))
 }
 
-fn parse_scene_heading(input: &str) -> IResult<&str, FuntElement> {
+fn parse_scene_heading(input: &str) -> IResult<&str, FarceElement> {
     // Like EXT. A field in England
     map(
         pair(
@@ -158,7 +158,7 @@ fn parse_scene_heading(input: &str) -> IResult<&str, FuntElement> {
             delimited(multispace0, not_line_ending, line_ending),
         ),
         |s: (&str, &str)| {
-            FuntElement::FSceneHeading(SceneHeading {
+            FarceElement::FSceneHeading(SceneHeading {
                 int_or_ext: s.0.to_string(),
                 text: s.1.to_string(),
             })
@@ -166,10 +166,10 @@ fn parse_scene_heading(input: &str) -> IResult<&str, FuntElement> {
     )(input)
 }
 
-fn parse_dialogue(input: &str) -> IResult<&str, FuntElement> {
+fn parse_dialogue(input: &str) -> IResult<&str, FarceElement> {
     let (i, (character_name, extension)) = parse_character_name(input)?;
     let (remainder, lines) = many1(nonempty_line)(i)?;
-    let e = FuntElement::FDialogue(Dialogue {
+    let e = FarceElement::FDialogue(Dialogue {
         character_name: String::from(character_name),
         character_extension: {
             if let Some(character_extension) = extension {
@@ -184,22 +184,22 @@ fn parse_dialogue(input: &str) -> IResult<&str, FuntElement> {
     Ok((remainder, e))
 }
 
-fn parse_action(input: &str) -> IResult<&str, FuntElement> {
+fn parse_action(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, lines) = many1(terminated(
         take_while1(|c| c != '\r' && c != '\n'), // Not sure why not_newline doesn't work here?
         line_ending,
     ))(input)?;
     let (remainder, _) = consume_whitespace(remainder)?;
-    Ok((remainder, FuntElement::FAction(lines.join("\n"))))
+    Ok((remainder, FarceElement::FAction(lines.join("\n"))))
 }
 
-fn parse_page_break(input: &str) -> IResult<&str, FuntElement> {
+fn parse_page_break(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, _) =
         terminated(take_while_m_n(3, 1e23 as usize, |s| s == '='), line_ending)(input)?;
-    Ok((remainder, FuntElement::FPageBreak))
+    Ok((remainder, FarceElement::FPageBreak))
 }
 
-fn parse_element(input: &str) -> IResult<&str, FuntElement> {
+fn parse_element(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, element) = alt((
         parse_scene_heading,
         parse_dialogue,
@@ -210,7 +210,7 @@ fn parse_element(input: &str) -> IResult<&str, FuntElement> {
     Ok((remainder, element))
 }
 
-pub fn parse_elements(input: &str) -> IResult<&str, Vec<FuntElement>> {
+pub fn parse_elements(input: &str) -> IResult<&str, Vec<FarceElement>> {
     many1(parse_element)(input)
 }
 
@@ -264,11 +264,11 @@ fn parse_title_page(input: &str) -> IResult<&str, TitlePage> {
     Ok((remainder, e))
 }
 
-pub fn parse_document(input: &str) -> IResult<&str, FuntDocument> {
+pub fn parse_document(input: &str) -> IResult<&str, FarceDocument> {
     let (remainder, (title_page, elements)) = pair(opt(parse_title_page), parse_elements)(input)?;
     Ok((
         remainder,
-        FuntDocument {
+        FarceDocument {
             title_page: title_page,
             elements: elements,
         },

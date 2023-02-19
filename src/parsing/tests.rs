@@ -31,13 +31,13 @@ mod tests {
     use super::*;
     #[test]
     fn test_parse_element() {
-        let result: IResult<&str, FuntElement> =
+        let result: IResult<&str, FarceElement> =
             parse_element("FRED\nHello\nSailor\n\nextra junk here\n");
 
         let (remainder, element) = result.unwrap();
         assert_eq!(remainder, "extra junk here\n");
 
-        if let FuntElement::FDialogue(d) = element {
+        if let FarceElement::FDialogue(d) = element {
             assert_eq!(d.character_name, "FRED");
         } else {
             assert!(false);
@@ -83,7 +83,7 @@ mod tests {
         let result = parse_action(ACTION);
         let (remainder, element) = result.unwrap();
         assert_eq!(remainder, "");
-        if let FuntElement::FAction(action) = element {
+        if let FarceElement::FAction(action) = element {
             assert_eq!(action, "Fred and Toby,\nsitting in a tree");
         } else {
             assert!(false);
