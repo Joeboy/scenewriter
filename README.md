@@ -8,7 +8,7 @@ It parses the [Fountain Screenplay Format](https://fountain.io/), and generates 
 
 This was partly a learning project, and it's the first proper thing I've done in Rust, so if you're a real rust dev feel free to educate me about all the things I'm doing wrong.
 
-NB It looks for fonts under the directory the executable's in, so if you try to use `cargo run` you'll find it fails to generate the PDF. Instead do soemthing like:
+NB It looks for fonts under the directory the executable's in, so if you try to use `cargo run` you'll find it fails to generate the PDF. Instead do something like:
 
     cargo build
     cp target/debug/farce ./
