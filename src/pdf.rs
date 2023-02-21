@@ -7,7 +7,7 @@ use genpdf::{elements, fonts, style};
 use std::env;
 use std::process::exit;
 
-const DEFAULT_FONT_NAME: &'static str = "LiberationMono";
+const DEFAULT_FONT_NAME: &'static str = "Courier Prime";
 
 fn inches(inches: f32) -> f32 {
     // return mm
@@ -28,7 +28,7 @@ pub fn create_pdf(fountain_doc: FarceDocument, output_filename: &str) -> Result<
         .unwrap()
         .join("fonts")
         .join("truetype")
-        .join("liberation");
+        .join("Courier Prime");
     let default_font = fonts::from_files(font_dir, DEFAULT_FONT_NAME, None)
         .expect("Failed to load the default font family");
 
