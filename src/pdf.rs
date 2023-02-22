@@ -81,7 +81,7 @@ pub fn create_pdf(
     doc.set_line_spacing(1.0);
     doc.set_font_size(12);
     let mut decorator = genpdf::SimplePageDecorator::new();
-    decorator.set_margins((inches(0.5), inches(1.0), inches(1.0), inches(1.5)));
+    decorator.set_margins((inches(0.5), inches(0.8), inches(1.0), inches(1.5)));
     decorator.set_header(move |page| {
         let mut layout = elements::LinearLayout::vertical();
         if has_title_page {
@@ -164,7 +164,7 @@ pub fn create_pdf(
                 )));
                 doc.push(Paragraph::new(dialogue.text).padded((
                     0.0,
-                    inches(1.1),
+                    inches(1.3),
                     0.0,
                     inches(0.875),
                 )));
