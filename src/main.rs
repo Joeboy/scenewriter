@@ -1,11 +1,10 @@
-use crate::parsing::FarceElement;
 use crate::pdf::create_pdf;
 use std::env;
 use std::fmt;
 use std::fs;
 use std::path::Path;
 use std::process::exit;
-mod parsing;
+mod document;
 mod pdf;
 
 enum OutputMode {
@@ -26,6 +25,7 @@ impl fmt::Display for OutputMode {
     }
 }
 
+
 fn print_usage() {
     println!("Usage: farce [--output [filename]] [--pdf|html] input.fountain");
     exit(1)
@@ -33,9 +33,13 @@ fn print_usage() {
 
 fn main() {
     let mut args = env::args().skip(1);
-    let mut input_filename: Option<&str> = None;
-    let mut output_filename: Option<String> = None;
+    let mut maybe_input_filename: Option<&str> = None;
+    let input_filename: &str;
+    let mut maybe_output_filename: Option<String> = None;
+    let output_filename: &str;
     let mut positional_args = Vec::new();
+    let mut requested_paper_sizes = Vec::new();
+    let paper_size: pdf::PaperSize;
     let mut output_mode: OutputMode = OutputMode::Pdf;
 
     while let Some(arg) = args.next() {
@@ -47,11 +51,17 @@ fn main() {
                 output_mode = OutputMode::Html;
             }
             "--output" | "-o" => {
-                output_filename = args.next();
-                if output_filename.is_none() {
+                maybe_output_filename = args.next();
+                if maybe_output_filename.is_none() {
                     eprintln!("No value specified for parameter {}", &arg);
                     print_usage()
                 }
+            }
+            "--a4" | "-a" => {
+                requested_paper_sizes.push(pdf::PaperSize::A4);
+            }
+            "--letter" | "-l" => {
+                requested_paper_sizes.push(pdf::PaperSize::Letter);
             }
             "--usage" => print_usage(),
             _ => {
@@ -71,47 +81,66 @@ fn main() {
             print_usage()
         }
         1 => {
-            input_filename = Some(&positional_args[0]);
+            maybe_input_filename = Some(&positional_args[0]);
         }
         _ => {
             eprintln!("Couldn't parse commandline args");
             print_usage()
         }
     }
+    input_filename = maybe_input_filename.unwrap();
 
-    if output_filename.is_none() {
-        let input_path = Path::new(input_filename.unwrap());
-        let file_stem = input_path.file_stem().unwrap().to_str().unwrap();
-        let suffix = match output_mode {
-            OutputMode::Html => "html",
-            OutputMode::Pdf => "pdf",
-        };
-        output_filename = Some(format!("{}.{}", file_stem, suffix));
+    let output_filename_string: String;
+    output_filename = match maybe_output_filename {
+        Some(ref of) => &of,
+        None => {
+            let input_path = Path::new(input_filename);
+            let file_stem = input_path.file_stem().unwrap().to_str().unwrap();
+            let suffix = match output_mode {
+                OutputMode::Html => "html",
+                OutputMode::Pdf => "pdf",
+            };
+            output_filename_string = format!("{}.{}", file_stem, suffix);
+            &output_filename_string
+        }
+    };
+
+    match requested_paper_sizes.len() {
+        0 => {
+            paper_size = pdf::PaperSize::A4;
+        }
+        1 => {
+            paper_size = requested_paper_sizes[0];
+        }
+        _ => {
+            eprintln!("Multiple page sizes requested");
+            exit(1)
+        }
     }
-
-    println!("Input file: {}", &input_filename.as_ref().unwrap());
-    println!("Output file: {}", &output_filename.as_ref().unwrap());
+    println!("Input file: {}", input_filename);
+    println!("Output file: {}", output_filename);
     println!("Output mode: {}", output_mode);
+    println!("Page size: {}", paper_size);
 
-    let input = match fs::read_to_string(input_filename.unwrap()) {
+    let input = match fs::read_to_string(input_filename) {
         Ok(s) => s,
         Err(err) => {
-            eprintln!(
-                "Couldn't read input file {} ({})",
-                input_filename.unwrap(),
-                err
-            );
+            eprintln!("Couldn't read input file {} ({})", input_filename, err);
             exit(1)
         }
     };
 
-    match parsing::parse_document(&input) {
+    match document::parse_fountain(&input) {
         Ok((remaining_input, document)) => {
             println!("==== Unhandled input ====\n\n {}", remaining_input);
 
             match output_mode {
-                OutputMode::Pdf => match create_pdf(document, &output_filename.unwrap()) {
-                    Ok(()) => {}
+                OutputMode::Pdf => match create_pdf(document, paper_size) {
+                    Ok(genpdf_document) => {
+                        genpdf_document
+                            .render_to_file(output_filename)
+                            .expect("Failed to write output file");
+                    }
                     Err(e) => {
                         eprintln!("Couldn't generate PDF ({})", e);
                         exit(1)

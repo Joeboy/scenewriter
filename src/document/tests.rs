@@ -1,4 +1,4 @@
-use crate::parsing::*;
+use crate::document::*;
 
 const TITLE_PAGE: &str = "Title: Big Fish
 Credit: written by
@@ -101,14 +101,14 @@ mod tests {
     #[test]
     fn test_parse_document() {
         let input = format!("{}\n\n{}", TITLE_PAGE, ELEMENTS);
-        let result = parse_document(input.as_str());
+        let result = parse_fountain(input.as_str());
         let (remainder, document) = result.unwrap();
         assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
     }
     #[test]
     fn test_parse_document_without_title_page() {
-        let result = parse_document(ELEMENTS);
+        let result = parse_fountain(ELEMENTS);
         let (remainder, document) = result.unwrap();
         assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);

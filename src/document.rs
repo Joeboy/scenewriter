@@ -1,14 +1,14 @@
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
-    character::complete::{char, line_ending, not_line_ending, multispace0, space0, space1},
+    character::complete::{char, line_ending, multispace0, not_line_ending, space0, space1},
     combinator::{map, opt},
     multi::many1,
     sequence::{delimited, pair, separated_pair, terminated},
     IResult,
 };
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Dialogue {
@@ -256,7 +256,7 @@ fn parse_title_page(input: &str) -> IResult<&str, TitlePage> {
     Ok((remainder, e))
 }
 
-pub fn parse_document(input: &str) -> IResult<&str, FarceDocument> {
+pub fn parse_fountain(input: &str) -> IResult<&str, FarceDocument> {
     let (remainder, (title_page, elements)) = pair(opt(parse_title_page), parse_elements)(input)?;
     Ok((
         remainder,
