@@ -58,20 +58,20 @@ impl FarceElement {
         match self {
             Self::FSceneHeading(scene_heading) => {
                 format!(
-                    "<div class=\"scene-heading\">\n<p>{}. {}</p></div>",
+                    "<div class=\"scene-heading\">\n<p>{}. {}</p>\n</div>\n\n",
                     scene_heading.int_or_ext, scene_heading.text
                 )
             }
             Self::FDialogue(dialogue) => {
                 format!(
-                    "<div class=\"element-dialogue\">\n<p>{}</p><p>{}</p></div>",
+                    "<div class=\"element-dialogue\">\n<p>{}</p>\n<p>{}</p>\n</div>\n\n",
                     dialogue.character_name, dialogue.text
                 )
             }
             Self::FAction(action) => {
-                format!("<div class=\"element-action\">\n<p>{}</p></div>", action)
+                format!("<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n", action)
             }
-            Self::FPageBreak => "<div class=\"element-pagebreak\"></div>".to_string(),
+            Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
         }
     }
 }
