@@ -18,3 +18,27 @@ NB It looks for fonts under the directory the executable's in, so if you try to 
     # PDF will be written to my-screenplay.pdf
 
 Maybe at some point I'll release some binaries with the fonts in the right place.
+
+### Usage
+
+    ./farce --help
+    
+    Usage: farce [..options..] input_filename
+    
+    Options:
+    
+                  --pdf     Output PDF (default)
+                 --html     Output HTML (Coming soon...)
+    
+               --letter     US Letter page size (default)
+                     -l
+    
+                   --a4     A4 page size
+                     -a
+    
+      --output filename     Choose output filename (default is the
+            -o filename     input filename but with pdf extension)
+    
+                 --help     Show this help
+    
+    Eg. farce --a4 --pdf -o "My Screenplay final-v23.pdf" my_screenplay.fountain

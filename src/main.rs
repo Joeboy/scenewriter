@@ -25,9 +25,28 @@ impl fmt::Display for OutputMode {
     }
 }
 
-
 fn print_usage() {
-    println!("Usage: farce [--output [filename]] [--pdf|html] input.fountain");
+    println!();
+    println!("Usage: farce [..options..] input_filename");
+    println!();
+    println!("Options:");
+    println!();
+    println!("             --pdf     Output PDF (default)");
+    println!("            --html     Output HTML (Coming soon...)");
+    println!();
+    println!("          --letter     US Letter page size (default)");
+    println!("                -l");
+    println!();
+    println!("              --a4     A4 page size");
+    println!("                -a");
+    println!();
+    println!(" --output filename     Choose output filename (default is the");
+    println!("       -o filename     input filename but with pdf extension)");
+    println!();
+    println!("            --help     Show this help");
+    println!();
+    println!("Eg. farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain");
+    println!();
     exit(1)
 }
 
@@ -63,7 +82,7 @@ fn main() {
             "--letter" | "-l" => {
                 requested_paper_sizes.push(pdf::PaperSize::Letter);
             }
-            "--usage" => print_usage(),
+            "--help" => print_usage(),
             _ => {
                 if arg.starts_with('-') {
                     println!("Unrecognized argument {}", arg);
