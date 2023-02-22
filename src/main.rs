@@ -1,12 +1,18 @@
+mod constants;
+mod document;
+mod html;
+mod pdf;
+
+use crate::html::write_html;
 use crate::pdf::create_pdf;
+
 use std::env;
 use std::fmt;
 use std::fs;
 use std::path::Path;
 use std::process::exit;
-mod document;
-mod pdf;
 
+#[derive(Copy, Clone, Debug)]
 enum OutputMode {
     Html,
     Pdf,
@@ -32,7 +38,7 @@ fn print_usage() {
     println!("Options:");
     println!();
     println!("             --pdf     Output PDF (default)");
-    println!("            --html     Output HTML (Coming soon...)");
+    println!("            --html     Output HTML");
     println!();
     println!("          --letter     US Letter page size (default)");
     println!("                -l");
@@ -59,15 +65,16 @@ fn main() {
     let mut positional_args = Vec::new();
     let mut requested_paper_sizes = Vec::new();
     let paper_size: pdf::PaperSize;
-    let mut output_mode: OutputMode = OutputMode::Pdf;
+    let mut requested_output_modes = Vec::new();
+    let output_mode: OutputMode;
 
     while let Some(arg) = args.next() {
         match &arg[..] {
             "--pdf" => {
-                output_mode = OutputMode::Pdf;
+                requested_output_modes.push(OutputMode::Pdf);
             }
             "--html" => {
-                output_mode = OutputMode::Html;
+                requested_output_modes.push(OutputMode::Html);
             }
             "--output" | "-o" => {
                 maybe_output_filename = args.next();
@@ -109,6 +116,19 @@ fn main() {
     }
     input_filename = maybe_input_filename.unwrap();
 
+    match requested_output_modes.len() {
+        0 => {
+            output_mode = OutputMode::Pdf;
+        }
+        1 => {
+            output_mode = requested_output_modes[0];
+        }
+        _ => {
+            eprintln!("Can't output to pdf and html at the same time");
+            exit(1)
+        }
+    }
+
     let output_filename_string: String;
     output_filename = match maybe_output_filename {
         Some(ref of) => &of,
@@ -136,6 +156,7 @@ fn main() {
             exit(1)
         }
     }
+
     println!("Input file: {}", input_filename);
     println!("Output file: {}", output_filename);
     println!("Output mode: {}", output_mode);
@@ -166,13 +187,17 @@ fn main() {
                     }
                 },
                 OutputMode::Html => {
-                    eprintln!("Html output not supported just yet, sorry");
-                    exit(1)
+                    let f = fs::File::create(output_filename).expect(&format!(
+                        "Could not open file {} for writing",
+                        output_filename
+                    ));
+                    write_html(document, f).unwrap();
                 }
             }
         }
         Err(error) => {
             println!("Parsing error: {:?}", error);
+            exit(1)
         }
     }
 }

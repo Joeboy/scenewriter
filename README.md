@@ -28,7 +28,7 @@ Maybe at some point I'll release some binaries with the fonts in the right place
     Options:
     
                   --pdf     Output PDF (default)
-                 --html     Output HTML (Coming soon...)
+                 --html     Output HTML
     
                --letter     US Letter page size (default)
                      -l

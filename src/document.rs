@@ -53,6 +53,29 @@ pub enum FarceElement {
     FPageBreak,
 }
 
+impl FarceElement {
+    pub fn as_html(&self) -> String {
+        match self {
+            Self::FSceneHeading(scene_heading) => {
+                format!(
+                    "<div class=\"scene-heading\">\n<p>{}. {}</p></div>",
+                    scene_heading.int_or_ext, scene_heading.text
+                )
+            }
+            Self::FDialogue(dialogue) => {
+                format!(
+                    "<div class=\"element-dialogue\">\n<p>{}</p><p>{}</p></div>",
+                    dialogue.character_name, dialogue.text
+                )
+            }
+            Self::FAction(action) => {
+                format!("<div class=\"element-action\">\n<p>{}</p></div>", action)
+            }
+            Self::FPageBreak => "<div class=\"element-pagebreak\"></div>".to_string(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct TitlePage {
     pub fields: HashMap<String, String>,
@@ -65,34 +88,15 @@ pub struct FarceDocument {
 }
 
 impl FarceDocument {
-    pub fn get_title(&self) -> String {
+    pub fn get_titlepage_field(&self, field_name: &str) -> Option<&String> {
         match &self.title_page {
-            Some(title_page) => match title_page.fields.get("Title") {
-                Some(title) => title.to_string(),
-                None => "A screenplay".to_string(),
-            },
-            None => "A Screenplay".to_string(),
-        }
-    }
-
-    pub fn get_credit(&self) -> String {
-        match &self.title_page {
-            Some(title_page) => match title_page.fields.get("Credit") {
-                Some(title) => title.to_string(),
-                None => "by".to_string(),
-            },
-            None => "by".to_string(),
-        }
-    }
-
-    pub fn get_author(&self) -> Option<String> {
-        match &self.title_page {
-            Some(title_page) => match title_page.fields.get("Author") {
-                Some(author) => Some(author.to_string()),
-                None => None,
-            },
+            Some(title_page) => title_page.fields.get(field_name),
             None => None,
         }
+    }
+
+    pub fn get_title(&self) -> Option<&String> {
+        self.get_titlepage_field("Title")
     }
 
     pub fn has_title_page(&self) -> bool {

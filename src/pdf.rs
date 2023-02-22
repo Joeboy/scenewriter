@@ -1,14 +1,10 @@
-use crate::document::FarceDocument;
-use crate::document::FarceElement;
+use crate::constants;
+use crate::document::{FarceDocument, FarceElement};
 use genpdf;
-use genpdf::elements::Paragraph;
-use genpdf::Alignment;
-use genpdf::Element;
-use genpdf::{elements, fonts, style};
+use genpdf::{Alignment, Element, elements, fonts, style, elements::Paragraph};
 use std::env;
 use std::fmt;
 use std::process::exit;
-const DEFAULT_FONT_NAME: &'static str = "Courier Prime";
 
 fn inches(inches: f32) -> f32 {
     // return mm
@@ -55,6 +51,12 @@ pub fn create_pdf(
     fountain_doc: FarceDocument,
     paper_size: PaperSize,
 ) -> Result<genpdf::Document, String> {
+    let title = {
+        match fountain_doc.get_title() {
+            Some(title) => title,
+            None => constants::DEFAULT_TITLE,
+        }
+    };
     let has_title_page = fountain_doc.has_title_page();
     let exe_path = match env::current_exe() {
         Ok(exe_path) => exe_path,
@@ -69,12 +71,12 @@ pub fn create_pdf(
         .join("fonts")
         .join("truetype")
         .join("Courier Prime");
-    let default_font = fonts::from_files(font_dir, DEFAULT_FONT_NAME, None)
+    let default_font = fonts::from_files(font_dir, constants::DEFAULT_FONT_NAME, None)
         .expect("Failed to load the default font family");
 
     let mut doc = genpdf::Document::new(default_font);
     doc.set_paper_size(paper_size.get_genpdf_paper_size());
-    doc.set_title(fountain_doc.get_title());
+    doc.set_title(title);
     doc.set_minimal_conformance();
     doc.set_line_spacing(1.0);
     doc.set_font_size(12);
@@ -106,11 +108,19 @@ pub fn create_pdf(
 
     if has_title_page {
         doc.push(elements::Break::new(10));
-        doc.push(Paragraph::new(fountain_doc.get_title()).aligned(Alignment::Center));
+        doc.push(Paragraph::new(title).aligned(Alignment::Center));
         doc.push(elements::Break::new(1));
-        match fountain_doc.get_author() {
+        match fountain_doc.get_titlepage_field("Author") {
             Some(author_name) => {
-                doc.push(Paragraph::new(fountain_doc.get_credit()).aligned(Alignment::Center));
+                doc.push(
+                    Paragraph::new({
+                        match fountain_doc.get_titlepage_field("Credit") {
+                            Some(credit) => credit,
+                            None => constants::DEFAULT_CREDIT,
+                        }
+                    })
+                    .aligned(Alignment::Center),
+                );
                 doc.push(elements::Break::new(1));
                 doc.push(Paragraph::new(author_name).aligned(Alignment::Center));
             }
