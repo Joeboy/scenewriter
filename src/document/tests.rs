@@ -49,9 +49,8 @@ mod tests {
         let result = parse_title_page("Title: Small Whale\nAuthor: Fred July\n\n");
         let (remainder, title_page) = result.unwrap();
         assert_eq!(remainder, "");
-        let fields: HashMap<_, _> = title_page.fields.into_iter().collect();
-        assert_eq!(fields["Title"], "Small Whale");
-        assert_eq!(fields["Author"], "Fred July");
+        assert_eq!(title_page.fields["Title"], "Small Whale");
+        assert_eq!(title_page.fields["Author"], "Fred July");
     }
 
     #[test]
@@ -59,13 +58,14 @@ mod tests {
         let result = parse_title_page(TITLE_PAGE);
         let (remainder, title_page) = result.unwrap();
         assert_eq!(remainder, "");
-        let fields: HashMap<_, _> = title_page.fields.into_iter().collect();
-        assert_eq!(fields["Title"], "Big Fish");
-        assert_eq!(fields["Author"], "John August");
-        assert_eq!(fields["Credit"], "written by");
-        assert_eq!(fields["Source"], "based on the novel by Daniel Wallace");
+        assert_eq!(title_page.fields["Title"], "Big Fish");
+        assert_eq!(title_page.fields["Author"], "John August");
+        assert_eq!(title_page.fields["Title"], "Big Fish");
+        assert_eq!(title_page.fields["Author"], "John August");
+        assert_eq!(title_page.fields["Credit"], "written by");
+        assert_eq!(title_page.fields["Source"], "based on the novel by Daniel Wallace");
         assert_eq!(
-            fields["Notes"],
+            title_page.fields["Notes"],
             "FINAL PRODUCTION DRAFT\nincludes post-production dialogue \nand omitted scenes"
         );
     }
@@ -103,6 +103,9 @@ mod tests {
         let input = format!("{}\n\n{}", TITLE_PAGE, ELEMENTS);
         let result = parse_fountain(input.as_str());
         let (remainder, document) = result.unwrap();
+        let title_page = document.title_page.unwrap();
+        assert_eq!(title_page.fields["Title"], "Big Fish");
+        assert_eq!(title_page.fields["Author"], "John August");
         assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
     }
@@ -110,6 +113,8 @@ mod tests {
     fn test_parse_document_without_title_page() {
         let result = parse_fountain(ELEMENTS);
         let (remainder, document) = result.unwrap();
+        let title_page = document.title_page;
+        assert!(title_page.is_none());
         assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
     }
