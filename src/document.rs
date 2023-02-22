@@ -3,7 +3,7 @@ use nom::{
     bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
     character::complete::{char, line_ending, multispace0, not_line_ending, space0, space1},
     combinator::{map, opt},
-    multi::many1,
+    multi::{many0, many1},
     sequence::{delimited, pair, separated_pair, terminated},
     IResult,
 };
@@ -13,8 +13,20 @@ use std::fmt;
 #[derive(Debug)]
 pub struct Dialogue {
     pub character_name: String,
-    pub character_extension: Option<String>, // The bit in brackets after the character name, eg "WILL (V.O)"
+    pub character_extensions: Vec<String>, // The bit in brackets after the character name, eg "WILL (V.O)"
     pub text: String,
+}
+
+impl Dialogue {
+    pub fn character_line_as_text(&self) -> String {
+        match self.character_extensions.len() {
+            0 => self.character_name.to_string(),
+            _ => {
+                let extensions = self.character_extensions.join(") (");
+                format!("{} ({})", self.character_name, extensions)
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -65,11 +77,15 @@ impl FarceElement {
             Self::FDialogue(dialogue) => {
                 format!(
                     "<div class=\"element-dialogue\">\n<p>{}</p>\n<p>{}</p>\n</div>\n\n",
-                    dialogue.character_name, dialogue.text
+                    dialogue.character_line_as_text(),
+                    dialogue.text
                 )
             }
             Self::FAction(action) => {
-                format!("<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n", action)
+                format!(
+                    "<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n",
+                    action
+                )
             }
             Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
         }
@@ -117,18 +133,6 @@ fn truncate_string(ss: &String, num_chars: Option<usize>) -> String {
     s
 }
 
-fn is_character_name_char(c: char) -> bool {
-    // For now let's say speaker names can only have caps and spaces
-    c.is_ascii_uppercase() || c == ' ' || c.is_ascii_digit()
-}
-
-fn parse_character_name(input: &str) -> IResult<&str, (&str, Option<&str>)> {
-    let (i, name) = take_while(|c: char| is_character_name_char(c))(input)?;
-    let (i, extension) = opt(delimited(tag("("), is_not(")"), tag(")")))(i)?;
-    let (i, _) = line_ending(i)?;
-    Ok((i, (name, extension)))
-}
-
 fn one_or_more_non_newline_chars(input: &str) -> IResult<&str, &str> {
     let (i, line) = take_while1(|c: char| c != '\r' && c != '\n')(input)?;
     Ok((i, line))
@@ -162,18 +166,31 @@ fn parse_scene_heading(input: &str) -> IResult<&str, FarceElement> {
     )(input)
 }
 
+fn is_character_name_char(c: char) -> bool {
+    // For now let's say speaker names can only have caps and spaces
+    c.is_ascii_uppercase() || c == ' ' || c.is_ascii_digit()
+}
+
+fn parse_character_extension(input: &str) -> IResult<&str, &str> {
+    let (i, extension) = delimited(tag("("), is_not(")"), tag(")"))(input)?;
+    let (i, _whitespace) = space0(i)?;
+    Ok((i, extension))
+}
+
+fn parse_character_name(input: &str) -> IResult<&str, (&str, Vec<&str>)> {
+    let (i, name) = take_while(|c: char| is_character_name_char(c))(input)?;
+    let (i, _whitespace) = space0(i)?;
+    let (i, extensions) = many0(parse_character_extension)(i)?;
+    let (i, _) = line_ending(i)?;
+    Ok((i, (name, extensions)))
+}
+
 fn parse_dialogue(input: &str) -> IResult<&str, FarceElement> {
-    let (i, (character_name, extension)) = parse_character_name(input)?;
+    let (i, (character_name, extensions)) = parse_character_name(input)?;
     let (remainder, lines) = many1(nonempty_line)(i)?;
     let e = FarceElement::FDialogue(Dialogue {
         character_name: String::from(character_name),
-        character_extension: {
-            if let Some(character_extension) = extension {
-                Some(String::from(character_extension))
-            } else {
-                None
-            }
-        },
+        character_extensions: extensions.iter().map(|s| s.to_string()).collect(),
         text: String::from(lines.join(" ")),
     });
     let (remainder, _) = consume_whitespace(remainder)?;

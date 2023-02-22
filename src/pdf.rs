@@ -1,7 +1,7 @@
 use crate::constants;
 use crate::document::{FarceDocument, FarceElement};
 use genpdf;
-use genpdf::{Alignment, Element, elements, fonts, style, elements::Paragraph};
+use genpdf::{elements, elements::Paragraph, fonts, style, Alignment, Element};
 use std::env;
 use std::fmt;
 use std::process::exit;
@@ -156,15 +156,12 @@ pub fn create_pdf(
                 doc.push(elements::Break::new(1));
             }
             FarceElement::FDialogue(dialogue) => {
-                doc.push(
-                    Paragraph::new(match dialogue.character_extension {
-                        Some(character_extension) => {
-                            format!("{} ({})", dialogue.character_name, character_extension)
-                        }
-                        None => dialogue.character_name,
-                    })
-                    .padded((0.0, 0.0, 0.0, inches(1.9))),
-                );
+                doc.push(Paragraph::new(dialogue.character_line_as_text()).padded((
+                    0.0,
+                    0.0,
+                    0.0,
+                    inches(1.9),
+                )));
                 doc.push(Paragraph::new(dialogue.text).padded((
                     0.0,
                     inches(1.1),

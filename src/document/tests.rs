@@ -63,7 +63,10 @@ mod tests {
         assert_eq!(title_page.fields["Title"], "Big Fish");
         assert_eq!(title_page.fields["Author"], "John August");
         assert_eq!(title_page.fields["Credit"], "written by");
-        assert_eq!(title_page.fields["Source"], "based on the novel by Daniel Wallace");
+        assert_eq!(
+            title_page.fields["Source"],
+            "based on the novel by Daniel Wallace"
+        );
         assert_eq!(
             title_page.fields["Notes"],
             "FINAL PRODUCTION DRAFT\nincludes post-production dialogue \nand omitted scenes"
@@ -94,7 +97,7 @@ mod tests {
     fn test_parse_elements() {
         let result = parse_elements(ELEMENTS);
         let (remainder, elements) = result.unwrap();
-        dbg!(elements);
+        assert_eq!(elements.len(), 5);
         assert_eq!(remainder, "");
     }
 
@@ -117,5 +120,12 @@ mod tests {
         assert!(title_page.is_none());
         assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
+    }
+
+    #[test]
+    fn test_parse_dialogue_multiple_extensions() {
+        let (remainder, dialogue) = parse_dialogue("FRED (ABC) (EFG)\nHere's some dialogue with extensions\n").unwrap();
+        assert_eq!(remainder, "");
+        dbg!(dialogue);
     }
 }
