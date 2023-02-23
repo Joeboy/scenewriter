@@ -4,7 +4,11 @@
 
 ### What does it do?
 
-It parses the text based [Fountain Screenplay Format](https://fountain.io/), and generates a PDF in something approximating the [standard screenplay format](https://www.nfi.edu/screenplay-format/). It doesn't implement the full spec, and definitely has some bugs and omissions. But it seems to kinda mostly work, to the small extent I've tested it so far. [Here](https://fountain.io/_downloads/Big%20Fish.pdf)'s the reference version of the Big Fish screenplay from fountain.io, and [here](./samples/Big-Fish.pdf)'s Farce's effort at formatting the same [fountain file](https://fountain.io/_downloads/Big-Fish.fountain). It's kind of in the ballpark, but not quite there yet. For the even less polished HTML output see [here](./samples/Big-Fish.html).
+It parses the text based [Fountain Screenplay Format](https://fountain.io/), and generates a PDF in something approximating the [standard screenplay format](https://www.nfi.edu/screenplay-format/). It doesn't implement the full spec, and definitely has some bugs and omissions. But it seems to kinda mostly work, to the small extent I've tested it so far.
+
+[Here](https://fountain.io/_downloads/Big%20Fish.pdf)'s the reference version of the Big Fish screenplay from fountain.io, and [here](./samples/Big-Fish.pdf)'s Farce's effort at formatting the same [fountain file](https://fountain.io/_downloads/Big-Fish.fountain). It's kind of in the ballpark, but not quite there yet. For the even less polished HTML output see [here](./samples/Big-Fish.html).
+
+On my laptop, HTML generation is basically instant (~50ms for Big Fish). Generating the 119 page PDF from the same file takes about 5s. Not sure if that's good or bad?
 
 If you'd especially like anything implemented or fixed please raise an issue. See the issues to get a vague idea of the current priorities.
 
