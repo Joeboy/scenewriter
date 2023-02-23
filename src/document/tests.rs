@@ -10,13 +10,13 @@ Notes:
 	and omitted scenes\n\n";
 
 const ELEMENTS: &str = "FRED
-Hey there Toby
+_Hey_ there Toby
 
 TOBY
-Hello! It's nice to see you!
+Hello! It's **nice** to see you!
 
 FRED
-Wish I could say the same
+Wish *I* could say the same
 
 =====
 
@@ -122,9 +122,23 @@ mod tests {
 
     #[test]
     fn test_parse_dialogue_multiple_extensions() {
-        let (remainder, dialogue) =
+        let (remainder, element) =
             parse_dialogue("FRED (ABC) (EFG)\nHere's some dialogue with extensions\n").unwrap();
         assert_eq!(remainder, "");
-        dbg!(dialogue);
+        match element {
+            FarceElement::FDialogue(dialogue) => {
+                assert_eq!(dialogue.character_extensions.len(), 2);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_dialogue_as_html() {
+        let (remainder, dialogue) =
+            parse_dialogue("FRED (ABC) (EFG)\nHere's some **bold**, *italicized*, ***bold-italicized***  and _underlined_ dialogue\n").unwrap();
+        assert_eq!(remainder, "");
+        let html = dialogue.as_html();
+        assert_eq!(html, "<div class=\"element-dialogue\">\n<p>FRED  (ABC) (EFG)</p>\n<p>Here's some <b>bold</b>, <i>italicized</i>, <b>bold-italicized</b>  and <u>underlined</u> dialogue</p>\n</div>\n\n")
     }
 }

@@ -1,6 +1,7 @@
 mod constants;
 mod document;
 mod html;
+mod inline_parser;
 mod pdf;
 
 use crate::html::write_html;

@@ -1,3 +1,4 @@
+use crate::inline_parser::parse_inline;
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
@@ -66,25 +67,41 @@ pub enum FarceElement {
 }
 
 impl FarceElement {
-    pub fn as_html(&self) -> String {
+    fn emphasis<'a>(&'a self, s: &'a String) -> String {
+        let result = parse_inline(s);
+        match result {
+            Ok(expressions) => {
+                expressions
+                    .iter()
+                    .map(|e| e.as_html())
+                    .collect::<Vec<String>>()
+                    .join("")
+            }
+            Err(e) => format!("{}", e),
+        }
+    }
+
+    pub fn as_html<'a>(&'a self) -> String {
         match self {
             Self::FSceneHeading(scene_heading) => {
+                let scene_heading_str =
+                    format!("{}. {}", scene_heading.int_or_ext, scene_heading.text);
                 format!(
-                    "<div class=\"scene-heading\">\n<p>{}. {}</p>\n</div>\n\n",
-                    scene_heading.int_or_ext, scene_heading.text
+                    "<div class=\"scene-heading\">\n<p>{}</p>\n</div>\n\n",
+                    scene_heading_str
                 )
             }
             Self::FDialogue(dialogue) => {
                 format!(
                     "<div class=\"element-dialogue\">\n<p>{}</p>\n<p>{}</p>\n</div>\n\n",
-                    dialogue.character_line_as_text(),
-                    dialogue.text
+                    self.emphasis(&dialogue.character_line_as_text()),
+                    self.emphasis(&dialogue.text)
                 )
             }
             Self::FAction(action) => {
                 format!(
                     "<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n",
-                    action
+                    self.emphasis(action)
                 )
             }
             Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
