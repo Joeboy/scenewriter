@@ -105,26 +105,25 @@ mod tests {
     fn test_parse_document() {
         let input = format!("{}\n\n{}", TITLE_PAGE, ELEMENTS);
         let result = parse_fountain(input.as_str());
-        let (remainder, document) = result.unwrap();
+        let document = result.unwrap();
         let title_page = document.title_page.unwrap();
         assert_eq!(title_page.fields["Title"], "Big Fish");
         assert_eq!(title_page.fields["Author"], "John August");
-        assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
     }
     #[test]
     fn test_parse_document_without_title_page() {
         let result = parse_fountain(ELEMENTS);
-        let (remainder, document) = result.unwrap();
+        let document = result.unwrap();
         let title_page = document.title_page;
         assert!(title_page.is_none());
-        assert_eq!(remainder, "");
         assert_eq!(document.elements.len(), 5);
     }
 
     #[test]
     fn test_parse_dialogue_multiple_extensions() {
-        let (remainder, dialogue) = parse_dialogue("FRED (ABC) (EFG)\nHere's some dialogue with extensions\n").unwrap();
+        let (remainder, dialogue) =
+            parse_dialogue("FRED (ABC) (EFG)\nHere's some dialogue with extensions\n").unwrap();
         assert_eq!(remainder, "");
         dbg!(dialogue);
     }

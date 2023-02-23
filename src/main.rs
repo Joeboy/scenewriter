@@ -171,28 +171,24 @@ fn main() {
     };
 
     match document::parse_fountain(&input) {
-        Ok((remaining_input, document)) => {
-            println!("==== Unhandled input ====\n\n {}", remaining_input);
-
-            match output_mode {
-                OutputMode::Pdf => match create_pdf(document, paper_size) {
-                    Ok(genpdf_document) => {
-                        genpdf_document
-                            .render_to_file(output_filename)
-                            .expect("Failed to write output file");
-                    }
-                    Err(e) => {
-                        eprintln!("Couldn't generate PDF ({})", e);
-                        exit(1)
-                    }
-                },
-                OutputMode::Html => {
-                    let f = fs::File::create(output_filename).expect(&format!(
-                        "Could not open file {} for writing",
-                        output_filename
-                    ));
-                    write_html(document, f).unwrap();
+        Ok(document) => match output_mode {
+            OutputMode::Pdf => match create_pdf(document, paper_size) {
+                Ok(genpdf_document) => {
+                    genpdf_document
+                        .render_to_file(output_filename)
+                        .expect("Failed to write output file");
                 }
+                Err(e) => {
+                    eprintln!("Couldn't generate PDF ({})", e);
+                    exit(1)
+                }
+            },
+            OutputMode::Html => {
+                let f = fs::File::create(output_filename).expect(&format!(
+                    "Could not open file {} for writing",
+                    output_filename
+                ));
+                write_html(document, f).unwrap();
             }
         }
         Err(error) => {

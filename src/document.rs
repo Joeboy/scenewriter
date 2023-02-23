@@ -277,15 +277,28 @@ fn parse_title_page(input: &str) -> IResult<&str, TitlePage> {
     Ok((remainder, e))
 }
 
-pub fn parse_fountain(input: &str) -> IResult<&str, FarceDocument> {
-    let (remainder, (title_page, elements)) = pair(opt(parse_title_page), parse_elements)(input)?;
-    Ok((
-        remainder,
-        FarceDocument {
-            title_page: title_page,
-            elements: elements,
+pub fn parse_fountain(input: &str) -> Result<FarceDocument, String> {
+    // Append a \n, in case the input doc doesn't end with one already:
+    let mut terminated_input = input.to_string();
+    terminated_input.push('\n');
+
+    let result = pair(opt(parse_title_page), parse_elements)(&terminated_input);
+    match result {
+        Ok((remainder, (title_page, elements))) => match remainder {
+            "" => Ok(FarceDocument {
+                title_page: title_page,
+                elements: elements,
+            }),
+            _ => {
+                let err: String = format!(
+                    "Found extraneous unparsed text: {}",
+                    truncate_string(&remainder.to_string(), Some(30))
+                );
+                Err(err)
+            }
         },
-    ))
+        Err(e) => Err(format!("{}", e)),
+    }
 }
 
 #[cfg(test)]
