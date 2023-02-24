@@ -2,6 +2,7 @@ mod constants;
 mod document;
 mod html;
 mod inline_parser;
+mod parser;
 mod pdf;
 
 use crate::html::write_html;
@@ -171,7 +172,7 @@ fn main() {
         }
     };
 
-    match document::parse_fountain(&input) {
+    match parser::parse_fountain(&input) {
         Ok((_remainder, document)) => match output_mode {
             OutputMode::Pdf => match create_pdf(document, paper_size) {
                 Ok(genpdf_document) => {
