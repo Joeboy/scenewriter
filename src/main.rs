@@ -172,7 +172,7 @@ fn main() {
     };
 
     match document::parse_fountain(&input) {
-        Ok(document) => match output_mode {
+        Ok((_remainder, document)) => match output_mode {
             OutputMode::Pdf => match create_pdf(document, paper_size) {
                 Ok(genpdf_document) => {
                     genpdf_document
@@ -191,7 +191,7 @@ fn main() {
                 ));
                 write_html(document, f).unwrap();
             }
-        }
+        },
         Err(error) => {
             println!("Parsing error: {:?}", error);
             exit(1)

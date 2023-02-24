@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_parse_action() {
-        let result = parse_action(ACTION);
+        let result = parse_element(ACTION);
         let (remainder, element) = result.unwrap();
         assert_eq!(remainder, "");
         if let FarceElement::FAction(action) = element {
@@ -105,7 +105,7 @@ mod tests {
     fn test_parse_document() {
         let input = format!("{}\n\n{}", TITLE_PAGE, ELEMENTS);
         let result = parse_fountain(input.as_str());
-        let document = result.unwrap();
+        let (_, document) = result.unwrap();
         let title_page = document.title_page.unwrap();
         assert_eq!(title_page.fields["Title"], "Big Fish");
         assert_eq!(title_page.fields["Author"], "John August");
@@ -114,7 +114,7 @@ mod tests {
     #[test]
     fn test_parse_document_without_title_page() {
         let result = parse_fountain(ELEMENTS);
-        let document = result.unwrap();
+        let (_, document) = result.unwrap();
         let title_page = document.title_page;
         assert!(title_page.is_none());
         assert_eq!(document.elements.len(), 5);
@@ -128,6 +128,31 @@ mod tests {
         match element {
             FarceElement::FDialogue(dialogue) => {
                 assert_eq!(dialogue.character_extensions.len(), 2);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_parse_dialogue_eof() {
+        let (remainder, element) =
+            parse_dialogue("FRED (ABC) (EFG)\nHere's some dialogue that ends without a newline").unwrap();
+        assert_eq!(remainder, "");
+        match element {
+            FarceElement::FDialogue(dialogue) => {
+                assert_eq!(dialogue.character_extensions.len(), 2);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_parse_action_eof() {
+        let (remainder, element) = parse_element("It's an action! With no newline!").unwrap();
+        assert_eq!(remainder, "");
+        match element {
+            FarceElement::FAction(action) => {
+                assert_eq!(action, "It's an action! With no newline!");
             }
             _ => panic!(),
         }

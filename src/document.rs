@@ -3,7 +3,7 @@ use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
     character::complete::{char, line_ending, multispace0, not_line_ending, space0, space1},
-    combinator::{map, opt},
+    combinator::{eof, map, opt},
     multi::{many0, many1},
     sequence::{delimited, pair, separated_pair, terminated},
     IResult,
@@ -70,13 +70,11 @@ impl FarceElement {
     fn emphasis<'a>(&'a self, s: &'a String) -> String {
         let result = parse_inline(s);
         match result {
-            Ok(expressions) => {
-                expressions
-                    .iter()
-                    .map(|e| e.as_html())
-                    .collect::<Vec<String>>()
-                    .join("")
-            }
+            Ok(expressions) => expressions
+                .iter()
+                .map(|e| e.as_html())
+                .collect::<Vec<String>>()
+                .join(""),
             Err(e) => format!("{}", e),
         }
     }
@@ -155,10 +153,13 @@ fn one_or_more_non_newline_chars(input: &str) -> IResult<&str, &str> {
     Ok((i, line))
 }
 
+fn eol_or_eof(input: &str) -> IResult<&str, &str> {
+    alt((line_ending, eof))(input)
+}
+
 fn nonempty_line(input: &str) -> IResult<&str, &str> {
-    //let (i, line) = take_while1(|c: char| c != '\r' && c != '\n')(input)?;
     let (i, line) = one_or_more_non_newline_chars(input)?;
-    let (i, _) = line_ending(i)?;
+    eol_or_eof(i)?;
     Ok((i, line))
 }
 
@@ -172,7 +173,7 @@ fn parse_scene_heading(input: &str) -> IResult<&str, FarceElement> {
     map(
         pair(
             terminated(alt((tag("INT"), tag("EXT"))), char('.')),
-            delimited(multispace0, not_line_ending, line_ending),
+            delimited(multispace0, not_line_ending, eol_or_eof),
         ),
         |s: (&str, &str)| {
             FarceElement::FSceneHeading(SceneHeading {
@@ -198,34 +199,31 @@ fn parse_character_name(input: &str) -> IResult<&str, (&str, Vec<&str>)> {
     let (i, name) = take_while(|c: char| is_character_name_char(c))(input)?;
     let (i, _whitespace) = space0(i)?;
     let (i, extensions) = many0(parse_character_extension)(i)?;
-    let (i, _) = line_ending(i)?;
     Ok((i, (name, extensions)))
 }
 
 fn parse_dialogue(input: &str) -> IResult<&str, FarceElement> {
-    let (i, (character_name, extensions)) = parse_character_name(input)?;
-    let (remainder, lines) = many1(nonempty_line)(i)?;
+    let (i, (character_name, extensions)) = terminated(parse_character_name, line_ending)(input)?;
+    let (remainder, lines) = many1(terminated(nonempty_line, opt(line_ending)))(i)?;
     let e = FarceElement::FDialogue(Dialogue {
         character_name: String::from(character_name),
         character_extensions: extensions.iter().map(|s| s.to_string()).collect(),
         text: String::from(lines.join(" ")),
     });
-    let (remainder, _) = consume_whitespace(remainder)?;
     Ok((remainder, e))
 }
 
 fn parse_action(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, lines) = many1(terminated(
         take_while1(|c| c != '\r' && c != '\n'), // Not sure why not_newline doesn't work here?
-        line_ending,
+        eol_or_eof,
     ))(input)?;
-    let (remainder, _) = consume_whitespace(remainder)?;
     Ok((remainder, FarceElement::FAction(lines.join("\n"))))
 }
 
 fn parse_page_break(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, _) =
-        terminated(take_while_m_n(3, 1e23 as usize, |s| s == '='), line_ending)(input)?;
+        terminated(take_while_m_n(3, 1e23 as usize, |s| s == '='), eol_or_eof)(input)?;
     Ok((remainder, FarceElement::FPageBreak))
 }
 
@@ -294,27 +292,17 @@ fn parse_title_page(input: &str) -> IResult<&str, TitlePage> {
     Ok((remainder, e))
 }
 
-pub fn parse_fountain(input: &str) -> Result<FarceDocument, String> {
-    // Append a \n, in case the input doc doesn't end with one already:
-    let mut terminated_input = input.to_string();
-    terminated_input.push('\n');
-
-    let result = pair(opt(parse_title_page), parse_elements)(&terminated_input);
+pub fn parse_fountain(input: &str) -> IResult<&str, FarceDocument> {
+    let result = pair(opt(parse_title_page), parse_elements)(&input);
     match result {
-        Ok((remainder, (title_page, elements))) => match remainder {
-            "" => Ok(FarceDocument {
+        Ok((remainder, (title_page, elements))) => Ok((
+            remainder,
+            FarceDocument {
                 title_page: title_page,
                 elements: elements,
-            }),
-            _ => {
-                let err: String = format!(
-                    "Found extraneous unparsed text: {}",
-                    truncate_string(&remainder.to_string(), Some(30))
-                );
-                Err(err)
-            }
-        },
-        Err(e) => Err(format!("{}", e)),
+            },
+        )),
+        Err(e) => Err(e),
     }
 }
 
