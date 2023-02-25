@@ -36,17 +36,6 @@ impl fmt::Display for PaperSize {
     }
 }
 
-// struct PageDimensions(f32, f32);
-
-// impl PaperSize {
-//     fn get_dimensions(&self) -> PageDimensions {
-//         match self {
-//             PaperSize::A4 => PageDimensions(297.0, 210.0),
-//             PaperSize::Letter => PageDimensions(279.0, 196.0),
-//         }
-//     }
-// }
-
 pub fn create_pdf(
     fountain_doc: FarceDocument,
     paper_size: PaperSize,
@@ -184,3 +173,6 @@ pub fn create_pdf(
     }
     Ok(doc)
 }
+
+#[cfg(test)]
+mod tests;
