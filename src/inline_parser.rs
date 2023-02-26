@@ -19,15 +19,15 @@ use nom::{
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum Expression<'a> {
-    Text(&'a str),
-    Italic(Vec<Expression<'a>>),
-    Bold(Vec<Expression<'a>>),
-    BoldItalic(Vec<Expression<'a>>),
-    Underline(Vec<Expression<'a>>),
+pub enum Expression {
+    Text(String),
+    Italic(Vec<Expression>),
+    Bold(Vec<Expression>),
+    BoldItalic(Vec<Expression>),
+    Underline(Vec<Expression>),
 }
 
-impl Expression<'_> {
+impl Expression {
     pub fn as_html<'a>(&self) -> String {
         let s: String;
         match self {
@@ -72,8 +72,8 @@ fn fenced<'a>(start: &'a str, end: &'a str) -> impl FnMut(&'a str) -> IResult<&'
     map(tuple((tag(start), take_until(end), tag(end))), |x| x.1)
 }
 
-fn style<'a>(boundary: &'a str) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<Expression<'a>>> {
-    map_parser(fenced(boundary, boundary), _parse_inline)
+fn style<'a>(boundary: &'a str) -> impl FnMut(&'a str) -> IResult<&'a str, Vec<Expression>> {
+    map_parser(fenced(boundary, boundary), parse_inline)
 }
 
 fn bold(input: &str) -> IResult<&str, Vec<Expression>> {
@@ -103,7 +103,7 @@ fn directive(input: &str) -> IResult<&str, Expression> {
 }
 
 /// Parse a line of text, counting anything that doesn't match a directive as plain text.
-fn _parse_inline(input: &str) -> IResult<&str, Vec<Expression>> {
+pub fn parse_inline(input: &str) -> IResult<&str, Vec<Expression>> {
     let mut output = Vec::with_capacity(4);
 
     let mut current_input = input;
@@ -117,7 +117,7 @@ fn _parse_inline(input: &str) -> IResult<&str, Vec<Expression>> {
                     // println!("Matched {:?} remaining {}", parsed, remaining);
                     let leading_text = &current_input[0..current_index];
                     if !leading_text.is_empty() {
-                        output.push(Expression::Text(leading_text));
+                        output.push(Expression::Text(leading_text.to_string()));
                     }
                     output.push(parsed);
 
@@ -137,7 +137,7 @@ fn _parse_inline(input: &str) -> IResult<&str, Vec<Expression>> {
         }
 
         if !found_directive {
-            output.push(Expression::Text(current_input));
+            output.push(Expression::Text(current_input.to_string()));
             break;
         }
     }
@@ -145,9 +145,13 @@ fn _parse_inline(input: &str) -> IResult<&str, Vec<Expression>> {
     Ok(("", output))
 }
 
-pub fn parse_inline(input: &str) -> Result<Vec<Expression>, String> {
-    match _parse_inline(input) {
-        Ok((_remainder, expressions)) => Ok(expressions),
-        Err(e) => Err(format!("{}", e)),
+#[cfg(test)]
+mod tests {
+    use crate::inline_parser::parse_inline;
+    #[test]
+    fn test_parse_inline() {
+        let (_remainder, expressions) =
+            parse_inline("Dave is *actually* **really** ***pissed*** _now_.").unwrap();
+        assert_eq!(expressions.len(), 9);
     }
 }

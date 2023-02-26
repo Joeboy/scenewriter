@@ -1,5 +1,6 @@
 use crate::constants;
 use crate::document::{FarceDocument, FarceElement};
+use crate::inline_parser::{parse_inline, Expression};
 use genpdf;
 use genpdf::{elements, elements::Paragraph, fonts, style, Alignment, Element};
 use std::env;
@@ -32,6 +33,88 @@ impl fmt::Display for PaperSize {
             PaperSize::Letter => {
                 write!(f, "US Letter")
             }
+        }
+    }
+}
+
+struct TextState {
+    bold: bool,
+    italic: bool,
+    underline: bool,
+}
+
+impl TextState {
+    fn get_genpdf_style(&self) -> style::Style {
+        let mut style = style::Style::default();
+        if self.bold {
+            style.merge(style::Effect::Bold);
+        };
+        if self.italic {
+            style.merge(style::Effect::Italic);
+        };
+        if self.underline {
+            // Not sure how to do this with genpdf???
+        };
+        style
+    }
+}
+
+fn render_text_elements(
+    p: &mut Paragraph,
+    expressions: &Vec<Expression>,
+    text_state: &mut TextState,
+) {
+    for e in expressions {
+        match e {
+            Expression::Text(t) => {
+                p.push(style::StyledString {
+                    s: t.to_string(),
+                    style: text_state.get_genpdf_style(),
+                });
+            }
+            Expression::Bold(v) => {
+                text_state.bold = true;
+                render_text_elements(p, &v, text_state);
+                text_state.bold = false;
+            }
+            Expression::Italic(v) => {
+                text_state.italic = true;
+                render_text_elements(p, &v, text_state);
+                text_state.italic = false;
+            }
+            Expression::BoldItalic(v) => {
+                text_state.bold = true;
+                text_state.italic = true;
+                render_text_elements(p, &v, text_state);
+                text_state.bold = false;
+                text_state.italic = false;
+            }
+            Expression::Underline(v) => {
+                // Not actually supported (yet?)
+                text_state.underline = true;
+                render_text_elements(p, &v, text_state);
+                text_state.underline = false;
+            }
+        }
+    }
+}
+
+fn render_inline_formatting(text: &str) -> Paragraph {
+    let mut p: Paragraph = Paragraph::default();
+    let mut_ref = &mut p;
+    match parse_inline(&text) {
+        Ok((_remainder, expressions)) => {
+            let mut text_state = TextState {
+                bold: false,
+                italic: false,
+                underline: false,
+            };
+            render_text_elements(mut_ref, &expressions, &mut text_state);
+            p
+        }
+        Err(e) => {
+            p.push(format!("{}", e));
+            p
         }
     }
 }
@@ -127,21 +210,10 @@ pub fn create_pdf(
         );
     }
 
-    let style_scene_header = style::Style::from(style::Effect::Bold);
-
-    // doc.push(
-    //     elements::Paragraph::default()
-    //         .string("You can also ")
-    //         .styled_string("combine ", red)
-    //         .styled_string("multiple ", style::Style::from(blue).italic())
-    //         .styled_string("formats", code)
-    //         .string(" in one paragraph.")
-    //         .styled(style::Style::new().with_font_size(16)),
-    // );
     for element in fountain_doc.elements {
         match element {
             FarceElement::FAction(text) => {
-                doc.push(elements::Paragraph::new(text));
+                doc.push(render_inline_formatting(&text));
                 doc.push(elements::Break::new(1));
             }
             FarceElement::FDialogue(dialogue) => {
@@ -151,7 +223,7 @@ pub fn create_pdf(
                     0.0,
                     inches(1.9),
                 )));
-                doc.push(Paragraph::new(dialogue.text).padded((
+                doc.push(render_inline_formatting(&dialogue.text).padded((
                     0.0,
                     inches(1.3),
                     0.0,
@@ -162,7 +234,7 @@ pub fn create_pdf(
             FarceElement::FSceneHeading(scene_heading) => {
                 doc.push(elements::Paragraph::default().styled_string(
                     format!("{}. {}", scene_heading.int_or_ext, scene_heading.text),
-                    style_scene_header,
+                    style::Style::from(style::Effect::Bold),
                 ));
                 doc.push(elements::Break::new(1));
             }

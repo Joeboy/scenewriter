@@ -61,7 +61,7 @@ impl FarceElement {
     fn emphasis<'a>(&'a self, s: &'a String) -> String {
         let result = parse_inline(s);
         match result {
-            Ok(expressions) => expressions
+            Ok((_remainder, expressions)) => expressions
                 .iter()
                 .map(|e| e.as_html())
                 .collect::<Vec<String>>()
