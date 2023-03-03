@@ -22,7 +22,7 @@ This was partly a learning project, and it's the first proper thing I've done in
 
     Options:
 
-                --pdf     Output PDF (default)
+                 --pdf     Output PDF (default)
                 --html     Output HTML
 
                   --a4     A4 page size (default)
@@ -31,12 +31,12 @@ This was partly a learning project, and it's the first proper thing I've done in
               --letter     US Letter page size
                     -l
 
-    --output filename     Choose output filename (default is the
-          -o filename     input filename but with pdf extension)
+     --output filename     Choose output filename (default is the
+           -o filename     input filename but with pdf extension)
 
                 --help     Show this help
 
 
-          Eg: farce --a4 --pdf -o "My Screenplay final-v23.pdf" my_screenplay.fountain
+         Eg: farce --a4 --pdf -o "My Screenplay final-v23.pdf" my_screenplay.fountain
 
     or just: farce my_screenplay.fountain
