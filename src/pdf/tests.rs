@@ -1,17 +1,18 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        document::{FarceDocument, FarceElement},
+        document::{Action, FarceDocument, FarceElement},
         pdf::create_pdf,
     };
 
     #[test]
     fn test_create_pdf() {
         let mut v = Vec::new();
-        v.push(FarceElement::FAction(
-            "Here's some *italic*, _underlined_, **bold** and ***Bold / italic*** text."
+        v.push(FarceElement::FAction(Action {
+            text: "Here's some *italic*, _underlined_, **bold** and ***Bold / italic*** text."
                 .to_string(),
-        ));
+            is_centered: false,
+        }));
         let fdoc = FarceDocument {
             title_page: None,
             elements: v,

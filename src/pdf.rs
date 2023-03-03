@@ -212,8 +212,8 @@ pub fn create_pdf(
 
     for element in fountain_doc.elements {
         match element {
-            FarceElement::FAction(text) => {
-                doc.push(render_inline_formatting(&text));
+            FarceElement::FAction(action) => {
+                doc.push(render_inline_formatting(&action.text));
                 doc.push(elements::Break::new(1));
             }
             FarceElement::FDialogue(dialogue) => {

@@ -90,7 +90,21 @@ mod tests {
         let (remainder, element) = result.unwrap();
         assert_eq!(remainder, "");
         if let FarceElement::FAction(action) = element {
-            assert_eq!(action, "Fred and Toby,\nsitting in a tree");
+            assert_eq!(action.text, "Fred and Toby,\nsitting in a tree");
+            assert_eq!(action.is_centered, false);
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_parse_centered_action() {
+        let result = parse_element(">Centered text<");
+        let (remainder, element) = result.unwrap();
+        assert_eq!(remainder, "");
+        if let FarceElement::FAction(action) = element {
+            assert_eq!(action.text, "Centered text");
+            assert_eq!(action.is_centered, true);
         } else {
             assert!(false);
         }
@@ -156,7 +170,8 @@ mod tests {
         assert_eq!(remainder, "");
         match element {
             FarceElement::FAction(action) => {
-                assert_eq!(action, "It's an action! With no newline!");
+                assert_eq!(action.text, "It's an action! With no newline!");
+                assert_eq!(action.is_centered, false);
             }
             _ => panic!(),
         }

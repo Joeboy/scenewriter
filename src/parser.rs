@@ -80,7 +80,32 @@ fn parse_action(input: &str) -> IResult<&str, FarceElement> {
         take_while1(|c| c != '\r' && c != '\n'), // Not sure why not_newline doesn't work here?
         eol_or_eof,
     ))(input)?;
-    Ok((remainder, FarceElement::FAction(lines.join("\n"))))
+    Ok((
+        remainder,
+        FarceElement::FAction(Action {
+            text: lines.join("\n"),
+            is_centered: false,
+        }),
+    ))
+}
+
+fn parse_centered_action(input: &str) -> IResult<&str, FarceElement> {
+    // For now let's assume this has to be one line only
+    let (remainder, line) = terminated(
+        delimited(
+            tag(">"),
+            take_while1(|c| c != '\r' && c != '\n' && c != '<'), // Not sure why not_newline doesn't work here?
+            tag("<"),
+        ),
+        eol_or_eof,
+    )(input)?;
+    Ok((
+        remainder,
+        FarceElement::FAction(Action {
+            text: line.trim().to_string(),
+            is_centered: true,
+        }),
+    ))
 }
 
 fn parse_page_break(input: &str) -> IResult<&str, FarceElement> {
@@ -94,6 +119,7 @@ fn parse_element(input: &str) -> IResult<&str, FarceElement> {
         parse_scene_heading,
         parse_dialogue,
         parse_page_break,
+        parse_centered_action,
         parse_action,
     ))(input)?;
     let (remainder, _) = consume_whitespace(remainder)?;

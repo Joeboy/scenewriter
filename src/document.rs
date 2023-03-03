@@ -50,10 +50,16 @@ impl fmt::Display for SceneHeading {
 }
 
 #[derive(Debug)]
+pub struct Action {
+    pub is_centered: bool,
+    pub text: String,
+}
+
+#[derive(Debug)]
 pub enum FarceElement {
     FDialogue(Dialogue),
     FSceneHeading(SceneHeading),
-    FAction(String),
+    FAction(Action),
     FPageBreak,
 }
 
@@ -90,7 +96,7 @@ impl FarceElement {
             Self::FAction(action) => {
                 format!(
                     "<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n",
-                    self.emphasis(action)
+                    self.emphasis(&action.text)
                 )
             }
             Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
