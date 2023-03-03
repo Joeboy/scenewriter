@@ -2,7 +2,8 @@ use crate::constants;
 use crate::document::{FarceDocument, FarceElement};
 use crate::inline_parser::{parse_inline, Expression};
 use genpdf;
-use genpdf::{elements, elements::Paragraph, fonts, style, Alignment, Element};
+use genpdf::{elements, fonts, style, Element};
+use genpdf::elements::{Paragraph, Alignment};
 use std::env;
 use std::fmt;
 use std::process::exit;
@@ -53,7 +54,7 @@ impl TextState {
             style.merge(style::Effect::Italic);
         };
         if self.underline {
-            // Not sure how to do this with genpdf???
+            style.merge(style::Effect::Underlined);
         };
         style
     }

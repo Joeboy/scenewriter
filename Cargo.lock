@@ -259,9 +259,8 @@ dependencies = [
 
 [[package]]
 name = "genpdf"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1c422344482708cb32db843cf3f55f27918cd24fec7b505bde895a1e8702c34"
+version = "0.1.1"
+source = "git+https://github.com/Joeboy/genpdf-rs.git#fa6e2ee9ac1b21faad748e590c0c12d181e5a2b3"
 dependencies = [
  "derive_more",
  "lopdf",
@@ -442,8 +441,7 @@ checksum = "07e2192780e9f8e282049ff9bffcaa28171e1cb0844f49ed5374e518ae6024ec"
 [[package]]
 name = "printpdf"
 version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a2472a184bcb128d0e3db65b59ebd11d010259a5e14fd9d048cba8f2c9302d4"
+source = "git+https://github.com/Joeboy/printpdf.git?branch=underlining#9945e3a290da3baabbbcef09dfed8e93a0e3c47e"
 dependencies = [
  "js-sys",
  "lopdf",
@@ -634,9 +632,9 @@ checksum = "213701ba3370744dcd1a12960caa4843b3d68b4d1c0a5d575e0d65b2ee9d16c0"
 
 [[package]]
 name = "syn"
-version = "1.0.107"
+version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f4064b5b16e03ae50984a5a8ed5d4f8803e6bc1fd170a3cda91a1be4b18e3f5"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
 dependencies = [
  "proc-macro2",
  "quote",
