@@ -2,11 +2,13 @@ use crate::constants;
 use crate::document::{FarceDocument, FarceElement};
 use crate::inline_parser::{parse_inline, Expression};
 use genpdf;
+use genpdf::elements::{Alignment, Paragraph};
+use genpdf::fonts::FontFamily;
 use genpdf::{elements, fonts, style, Element};
-use genpdf::elements::{Paragraph, Alignment};
-use std::env;
+use include_dir::{include_dir, Dir};
 use std::fmt;
-use std::process::exit;
+
+static FONTS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/fonts/truetype/Courier Prime");
 
 fn inches(inches: f32) -> f32 {
     // return mm
@@ -120,6 +122,11 @@ fn render_inline_formatting(text: &str) -> Paragraph {
     }
 }
 
+fn get_fontdata(font_filename: &str) -> fonts::FontData {
+    let f = FONTS_DIR.get_file(&font_filename).unwrap();
+    fonts::FontData::new(f.contents().to_vec(), None).unwrap()
+}
+
 pub fn create_pdf(
     fountain_doc: FarceDocument,
     paper_size: PaperSize,
@@ -131,21 +138,13 @@ pub fn create_pdf(
         }
     };
     let has_title_page = fountain_doc.has_title_page();
-    let exe_path = match env::current_exe() {
-        Ok(exe_path) => exe_path,
-        Err(e) => {
-            eprintln!("Couldn't get executable directory ({})", e);
-            exit(1)
-        }
+
+    let default_font = FontFamily {
+        regular: get_fontdata("Courier Prime Regular.ttf"),
+        italic: get_fontdata("Courier Prime Italic.ttf"),
+        bold: get_fontdata("Courier Prime Bold.ttf"),
+        bold_italic: get_fontdata("Courier Prime BoldItalic.ttf"),
     };
-    let font_dir = exe_path
-        .parent()
-        .unwrap()
-        .join("fonts")
-        .join("truetype")
-        .join("Courier Prime");
-    let default_font = fonts::from_files(font_dir, constants::DEFAULT_FONT_NAME, None)
-        .expect("Failed to load the default font family");
 
     let mut doc = genpdf::Document::new(default_font);
     doc.set_paper_size(paper_size.get_genpdf_paper_size());
