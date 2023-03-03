@@ -102,7 +102,7 @@ fn render_text_elements(
     }
 }
 
-fn render_inline_formatting(text: &str) -> Paragraph {
+fn render_inline_formatting(text: &str, is_centered: bool) -> Paragraph {
     let mut p: Paragraph = Paragraph::default();
     let mut_ref = &mut p;
     match parse_inline(&text) {
@@ -113,7 +113,10 @@ fn render_inline_formatting(text: &str) -> Paragraph {
                 underline: false,
             };
             render_text_elements(mut_ref, &expressions, &mut text_state);
-            p
+            match is_centered {
+                true => p.aligned(Alignment::Center),
+                false => p
+            }
         }
         Err(e) => {
             p.push(format!("{}", e));
@@ -213,7 +216,7 @@ pub fn create_pdf(
     for element in fountain_doc.elements {
         match element {
             FarceElement::FAction(action) => {
-                doc.push(render_inline_formatting(&action.text));
+                doc.push(render_inline_formatting(&action.text, action.is_centered));
                 doc.push(elements::Break::new(1));
             }
             FarceElement::FDialogue(dialogue) => {
@@ -223,7 +226,7 @@ pub fn create_pdf(
                     0.0,
                     inches(1.9),
                 )));
-                doc.push(render_inline_formatting(&dialogue.text).padded((
+                doc.push(render_inline_formatting(&dialogue.text, false).padded((
                     0.0,
                     inches(1.3),
                     0.0,
