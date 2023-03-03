@@ -14,15 +14,6 @@ If you'd especially like anything implemented or fixed please raise an issue. Se
 
 This was partly a learning project, and it's the first proper thing I've done in Rust, so if you're a real rust dev feel free to educate me about all the things I'm doing wrong.
 
-NB It looks for fonts under the directory the executable's in, so if you try to use `cargo run` you'll find it fails to generate the PDF. Instead do something like:
-
-    cargo build
-    cp target/debug/farce ./
-    ./farce my-screenplay.fountain
-    # PDF will be written to my-screenplay.pdf
-
-Maybe at some point I'll release some binaries with the fonts in the right place.
-
 ### Usage
 
     ./farce --help
