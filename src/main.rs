@@ -42,11 +42,11 @@ fn print_usage() {
     println!("             --pdf     Output PDF (default)");
     println!("            --html     Output HTML");
     println!();
-    println!("          --letter     US Letter page size (default)");
-    println!("                -l");
-    println!();
-    println!("              --a4     A4 page size");
+    println!("              --a4     A4 page size (default)");
     println!("                -a");
+    println!();
+    println!("          --letter     US Letter page size");
+    println!("                -l");
     println!();
     println!(" --output filename     Choose output filename (default is the");
     println!("       -o filename     input filename but with pdf extension)");
