@@ -19,21 +19,24 @@ This was partly a learning project, and it's the first proper thing I've done in
     ./farce --help
     
     Usage: farce [..options..] input_filename
-    
+
     Options:
-    
-                  --pdf     Output PDF (default)
-                 --html     Output HTML
-    
-               --letter     US Letter page size (default)
-                     -l
-    
-                   --a4     A4 page size
-                     -a
-    
-      --output filename     Choose output filename (default is the
-            -o filename     input filename but with pdf extension)
-    
-                 --help     Show this help
-    
-    Eg. farce --a4 --pdf -o "My Screenplay final-v23.pdf" my_screenplay.fountain
+
+                --pdf     Output PDF (default)
+                --html     Output HTML
+
+                  --a4     A4 page size (default)
+                    -a
+
+              --letter     US Letter page size
+                    -l
+
+    --output filename     Choose output filename (default is the
+          -o filename     input filename but with pdf extension)
+
+                --help     Show this help
+
+
+          Eg: farce --a4 --pdf -o "My Screenplay final-v23.pdf" my_screenplay.fountain
+
+    or just: farce my_screenplay.fountain

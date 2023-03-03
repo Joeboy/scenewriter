@@ -53,7 +53,10 @@ fn print_usage() {
     println!();
     println!("            --help     Show this help");
     println!();
-    println!("Eg. farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain");
+    println!();
+    println!("      Eg: farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain");
+    println!();
+    println!(" or just: farce my_screenplay.fountain");
     println!();
     exit(1)
 }
