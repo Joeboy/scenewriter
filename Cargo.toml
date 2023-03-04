@@ -1,9 +1,15 @@
 [package]
 name = "farce"
-version = "0.1.0"
+authors = ["Joe Button"]
+version = "0.0.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Convert fountain files into screenplay PDFs or HTML"
+readme = "README.md"
+repository = "https://github.com/Joeboy/farce"
+licence = "MIT"
+keywords = ["fountain", "screenplay", "screenwriting"]
+categories = ["command-line-utilities", "parser-implementations"]
+publish = false
 
 [dependencies]
 nom = "7.1.3"
