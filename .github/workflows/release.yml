@@ -1,7 +1,6 @@
 on:
-  create:
-    ref_type: tag
-    ref: 'v*'
+  release:
+    types: [created]
 
 name: Create release
 
