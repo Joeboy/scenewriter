@@ -61,7 +61,7 @@ fn parse_character_name(input: &str) -> IResult<&str, (&str, Vec<&str>)> {
     let (i, name) = take_while(|c: char| is_character_name_char(c))(input)?;
     let (i, _whitespace) = space0(i)?;
     let (i, extensions) = many0(parse_character_extension)(i)?;
-    Ok((i, (name, extensions)))
+    Ok((i, (name.trim(), extensions)))
 }
 
 fn parse_dialogue(input: &str) -> IResult<&str, FarceElement> {
