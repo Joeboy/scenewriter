@@ -57,7 +57,7 @@ fn print_usage() {
     println!();
     println!("             --pdf     Write PDF file (default)");
     println!("            --html     Write HTML file");
-    println!("           --stats     Show stats");
+    println!("           --stats     Show screenplay stats");
     println!();
     println!("              --a4     A4 page size (default)");
     println!("                -a");

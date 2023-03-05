@@ -42,8 +42,9 @@ the current priorities.
 
     Options:
 
-                 --pdf     Output PDF (default)
-                --html     Output HTML
+                 --pdf     Write PDF file (default)
+                --html     Write HTML file
+               --stats     Show screenplay stats
 
                   --a4     A4 page size (default)
                     -a
@@ -51,8 +52,8 @@ the current priorities.
               --letter     US Letter page size
                     -l
 
-     --output filename     Choose output filename (default is the
-           -o filename     input filename but with pdf extension)
+     --output filename     Choose output filename (default is the input
+           -o filename     filename but with .pdf or .html extension)
 
                 --help     Show this help
 
