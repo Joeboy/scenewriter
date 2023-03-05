@@ -4,6 +4,9 @@ on:
 
 name: Create release
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: release ${{ matrix.target }}
