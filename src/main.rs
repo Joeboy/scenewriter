@@ -4,9 +4,12 @@ mod html;
 mod inline_parser;
 mod parser;
 mod pdf;
+mod stats;
+mod utils;
 
 use crate::html::write_html;
 use crate::pdf::create_pdf;
+use crate::stats::print_stats;
 
 use std::env;
 use std::fmt;
@@ -18,16 +21,29 @@ use std::process::exit;
 enum OutputMode {
     Html,
     Pdf,
+    Stats,
 }
 
+impl OutputMode {
+    fn get_suffix(&self) -> Option<String> {
+        match self {
+            OutputMode::Html => Some(String::from("html")),
+            OutputMode::Pdf => Some(String::from("pdf")),
+            OutputMode::Stats => None,
+        }
+    }
+}
 impl fmt::Display for OutputMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             OutputMode::Html => {
-                write!(f, "Html mode")
+                write!(f, "Write HTML file")
             }
             OutputMode::Pdf => {
-                write!(f, "Pdf mode")
+                write!(f, "Write PDF file")
+            }
+            OutputMode::Stats => {
+                write!(f, "Show stats")
             }
         }
     }
@@ -39,8 +55,9 @@ fn print_usage() {
     println!();
     println!("Options:");
     println!();
-    println!("             --pdf     Output PDF (default)");
-    println!("            --html     Output HTML");
+    println!("             --pdf     Write PDF file (default)");
+    println!("            --html     Write HTML file");
+    println!("           --stats     Show stats");
     println!();
     println!("              --a4     A4 page size (default)");
     println!("                -a");
@@ -48,13 +65,15 @@ fn print_usage() {
     println!("          --letter     US Letter page size");
     println!("                -l");
     println!();
-    println!(" --output filename     Choose output filename (default is the");
-    println!("       -o filename     input filename but with pdf extension)");
+    println!(" --output filename     Choose output filename (default is the input");
+    println!("       -o filename     filename but with .pdf or .html extension)");
     println!();
     println!("            --help     Show this help");
     println!();
     println!();
-    println!("      Eg: farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain");
+    println!(
+        "      Eg: farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain"
+    );
     println!();
     println!(" or just: farce my_screenplay.fountain");
     println!();
@@ -66,7 +85,7 @@ fn main() {
     let mut maybe_input_filename: Option<&str> = None;
     let input_filename: &str;
     let mut maybe_output_filename: Option<String> = None;
-    let output_filename: &str;
+    let output_filename: Option<&str>;
     let mut positional_args = Vec::new();
     let mut requested_paper_sizes = Vec::new();
     let paper_size: pdf::PaperSize;
@@ -80,6 +99,9 @@ fn main() {
             }
             "--html" => {
                 requested_output_modes.push(OutputMode::Html);
+            }
+            "--stats" => {
+                requested_output_modes.push(OutputMode::Stats);
             }
             "--output" | "-o" => {
                 maybe_output_filename = args.next();
@@ -129,24 +151,24 @@ fn main() {
             output_mode = requested_output_modes[0];
         }
         _ => {
-            eprintln!("Can't output to pdf and html at the same time");
+            eprintln!("Please choose only one of --pdf, --html and --stats");
             exit(1)
         }
     }
 
     let output_filename_string: String;
-    output_filename = match maybe_output_filename {
-        Some(ref of) => &of,
-        None => {
-            let input_path = Path::new(input_filename);
-            let file_stem = input_path.file_stem().unwrap().to_str().unwrap();
-            let suffix = match output_mode {
-                OutputMode::Html => "html",
-                OutputMode::Pdf => "pdf",
-            };
-            output_filename_string = format!("{}.{}", file_stem, suffix);
-            &output_filename_string
-        }
+    output_filename = match output_mode {
+        OutputMode::Html | OutputMode::Pdf => match maybe_output_filename {
+            Some(ref of) => Some(of),
+            None => {
+                let input_path = Path::new(input_filename);
+                let file_stem = input_path.file_stem().unwrap().to_str().unwrap();
+                let suffix = output_mode.get_suffix().unwrap();
+                output_filename_string = format!("{}.{}", file_stem, suffix).to_string();
+                Some(&output_filename_string)
+            }
+        },
+        OutputMode::Stats => None,
     };
 
     match requested_paper_sizes.len() {
@@ -163,8 +185,13 @@ fn main() {
     }
 
     println!("Input file: {}", input_filename);
-    println!("Output file: {}", output_filename);
     println!("Output mode: {}", output_mode);
+    match output_filename {
+        Some(of) => {
+            println!("Output file: {}", of);
+        }
+        None => {}
+    }
     println!("Page size: {}", paper_size);
 
     let input = match fs::read_to_string(input_filename) {
@@ -180,7 +207,7 @@ fn main() {
             OutputMode::Pdf => match create_pdf(document, paper_size) {
                 Ok(genpdf_document) => {
                     genpdf_document
-                        .render_to_file(output_filename)
+                        .render_to_file(output_filename.unwrap())
                         .expect("Failed to write output file");
                 }
                 Err(e) => {
@@ -189,11 +216,14 @@ fn main() {
                 }
             },
             OutputMode::Html => {
-                let f = fs::File::create(output_filename).expect(&format!(
+                let f = fs::File::create(output_filename.unwrap()).expect(&format!(
                     "Could not open file {} for writing",
-                    output_filename
+                    output_filename.unwrap()
                 ));
                 write_html(document, f).unwrap();
+            }
+            OutputMode::Stats => {
+                print_stats(&document);
             }
         },
         Err(error) => {

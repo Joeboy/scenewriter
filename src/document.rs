@@ -1,4 +1,5 @@
 use crate::inline_parser::parse_inline;
+use crate::utils::truncate_string;
 use std::collections::HashMap;
 use std::fmt;
 
@@ -18,6 +19,10 @@ impl Dialogue {
                 format!("{} ({})", self.character_name, extensions)
             }
         }
+    }
+
+    pub fn get_num_words(&self) -> usize {
+        self.text.split_whitespace().count()
     }
 }
 
@@ -55,6 +60,12 @@ pub struct Action {
     pub text: String,
 }
 
+impl Action {
+    pub fn get_num_words(&self) -> usize {
+        self.text.split_whitespace().count()
+    }
+}
+
 #[derive(Debug)]
 pub enum FarceElement {
     FDialogue(Dialogue),
@@ -64,7 +75,7 @@ pub enum FarceElement {
 }
 
 impl FarceElement {
-    fn emphasis<'a>(&'a self, s: &'a String) -> String {
+    fn html_emphasis<'a>(&'a self, s: &'a String) -> String {
         let result = parse_inline(s);
         match result {
             Ok((_remainder, expressions)) => expressions
@@ -89,14 +100,14 @@ impl FarceElement {
             Self::FDialogue(dialogue) => {
                 format!(
                     "<div class=\"element-dialogue\">\n<p>{}</p>\n<p>{}</p>\n</div>\n\n",
-                    self.emphasis(&dialogue.character_line_as_text()),
-                    self.emphasis(&dialogue.text)
+                    self.html_emphasis(&dialogue.character_line_as_text()),
+                    self.html_emphasis(&dialogue.text)
                 )
             }
             Self::FAction(action) => {
                 format!(
                     "<div class=\"element-action\">\n<p>{}</p>\n</div>\n\n",
-                    self.emphasis(&action.text)
+                    self.html_emphasis(&action.text)
                 )
             }
             Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
@@ -133,16 +144,6 @@ impl FarceDocument {
             None => false,
         }
     }
-}
-
-fn truncate_string(ss: &String, num_chars: Option<usize>) -> String {
-    let mut s = ss.clone();
-    let num_chars = num_chars.unwrap_or(20);
-    if s.chars().count() > num_chars {
-        s.truncate(s.chars().take(num_chars).map(|c| c.len_utf8()).sum());
-        s.push_str("...");
-    }
-    s
 }
 
 #[cfg(test)]
