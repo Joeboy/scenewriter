@@ -1,7 +1,5 @@
 # Farce - a Fountain Parser
 
-### What does it do?
-
 `Farce` is a command line program that parses files in [Fountain markup language](https://fountain.io/),
 and generates PDFs in the [standard screenplay format](https://www.nfi.edu/screenplay-format/).
 It doesn't implement the full Fountain spec yet, and probably has bugs. But it
