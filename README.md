@@ -5,7 +5,7 @@ and generates PDFs in the [standard screenplay format](https://www.nfi.edu/scree
 It doesn't implement the full Fountain spec yet, and probably has bugs. But it
 seems to kinda mostly work, to the limited extent I've tested it so far.
 
-If you just want to download and run it, see the [releases](https://github.com/Joeboy/farce/releases/tag/v0.0.6).
+If you just want to download and use it, see the [releases](https://github.com/Joeboy/farce/releases/tag/v0.0.6).
 Note that it's still an unfinished / preview release. But for basic scenes,
 it might already do everything you need. Issues that might be offputting are:
 
