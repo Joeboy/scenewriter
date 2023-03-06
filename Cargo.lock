@@ -360,7 +360,7 @@ dependencies = [
 [[package]]
 name = "genpdf"
 version = "0.1.1"
-source = "git+https://github.com/Joeboy/genpdf-rs.git#52832b435a386dd6ea3a56132d8552c9b6c3d623"
+source = "git+https://github.com/Joeboy/genpdf-rs.git#b35040ec611b232a7f03436ff55169237d335800"
 dependencies = [
  "derive_more",
  "lopdf",
@@ -650,7 +650,7 @@ checksum = "07e2192780e9f8e282049ff9bffcaa28171e1cb0844f49ed5374e518ae6024ec"
 [[package]]
 name = "printpdf"
 version = "0.3.4"
-source = "git+https://github.com/Joeboy/printpdf.git#98153666e6764c10193104bf286cbfcf99760263"
+source = "git+https://github.com/Joeboy/printpdf.git?rev=9ca9b20#9ca9b200f162d153071a1bb554c9fd0b41285014"
 dependencies = [
  "js-sys",
  "lopdf",
