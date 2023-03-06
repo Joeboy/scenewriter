@@ -1,6 +1,6 @@
 use crate::inline_parser::parse_inline;
 use crate::utils::truncate_string;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 #[derive(Debug)]
@@ -113,6 +113,19 @@ impl FarceElement {
             Self::FPageBreak => "<div class=\"element-pagebreak\"></div>\n\n".to_string(),
         }
     }
+
+    pub fn get_all_chars(&self) -> String {
+        // Return a string of all chars used by the element, so we know which
+        // glyphs need to be embedded in the PDF
+        match self {
+            Self::FSceneHeading(scene_heading) => scene_heading.text.to_string(),
+            Self::FDialogue(dialogue) => {
+                format!("{}{}", dialogue.character_line_as_text(), dialogue.text)
+            }
+            Self::FAction(action) => action.text.to_string(),
+            Self::FPageBreak => String::new(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -143,6 +156,25 @@ impl FarceDocument {
             Some(_title_page) => true,
             None => false,
         }
+    }
+
+    pub fn get_all_chars(&self) -> Vec<char> {
+        // Get all the chars that appear in the doc, so we know which glyphs
+        // we need to embed in the PDF.
+        // Maybe we should keep track of the bold / italic chars separately,
+        // suspect it wouldn't make a huge difference though.
+        let mut unique_chars = HashSet::new();
+        for e in &self.elements {
+            for c in e.get_all_chars().chars() {
+                if c != '\n' {
+                    unique_chars.insert(c);
+                }
+            }
+        }
+        // Some characters that apear in "boilerplate", but could conceivably
+        // not appear in the "text":
+        unique_chars.extend("INTEXT._ ()".chars());
+        unique_chars.into_iter().collect()
     }
 }
 

@@ -1,6 +1,13 @@
 use crate::constants;
 use crate::document::{FarceDocument, FarceElement};
 use crate::inline_parser::{parse_inline, Expression};
+use allsorts::{
+    binary::read::ReadScope,
+    font::read_cmap_subtable,
+    subset::subset,
+    tables::{cmap::Cmap, FontTableProvider},
+    tag,
+};
 use genpdf;
 use genpdf::elements::{Alignment, Paragraph};
 use genpdf::fonts::FontFamily;
@@ -9,6 +16,7 @@ use include_dir::{include_dir, Dir};
 use std::fmt;
 
 static FONTS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/fonts/truetype/Courier Prime");
+const SKIP_FONT_SUBSETTING: bool = true;
 
 fn inches(inches: f32) -> f32 {
     // return mm
@@ -115,7 +123,7 @@ fn render_inline_formatting(text: &str, is_centered: bool) -> Paragraph {
             render_text_elements(mut_ref, &expressions, &mut text_state);
             match is_centered {
                 true => p.aligned(Alignment::Center),
-                false => p
+                false => p,
             }
         }
         Err(e) => {
@@ -125,9 +133,40 @@ fn render_inline_formatting(text: &str, is_centered: bool) -> Paragraph {
     }
 }
 
-fn get_fontdata(font_filename: &str) -> fonts::FontData {
-    let f = FONTS_DIR.get_file(&font_filename).unwrap();
-    fonts::FontData::new(f.contents().to_vec(), None).unwrap()
+fn get_fontdata(font_filename: &str, subset_chars: &Vec<char>) -> fonts::FontData {
+    let f = FONTS_DIR
+        .get_file(&font_filename)
+        .expect("Couldn't open font file");
+    let data = f.contents().to_vec();
+    if SKIP_FONT_SUBSETTING {
+        fonts::FontData::new(data, None).unwrap()
+    } else {
+        // To avoid bloating the PDF, we only embed the glyphs we need
+        let font_file = ReadScope::new(&data)
+            .read::<allsorts::font_data::FontData<'_>>()
+            .unwrap();
+        let provider = font_file.table_provider(0).unwrap();
+
+        let cmap_data = provider.read_table_data(tag::CMAP).unwrap();
+        let cmap = ReadScope::new(&cmap_data).read::<Cmap<'_>>().unwrap();
+        let (_, cmap_subtable) = read_cmap_subtable(&cmap).unwrap().unwrap();
+        let mut glyph_ids = vec![
+            0 as u16,
+            // Force unicode encoding:
+            cmap_subtable.map_glyph('€' as u32).unwrap().unwrap(),
+        ];
+        glyph_ids.extend(
+            subset_chars
+                .iter()
+                // TODO: pretty sure this'll fail disgracefully with unsupported chars
+                .map(|c| cmap_subtable.map_glyph(*c as u32).unwrap().unwrap()),
+        );
+        glyph_ids.sort();
+        glyph_ids.dedup();
+
+        let new_font = subset(&provider, &glyph_ids).unwrap();
+        fonts::FontData::new(new_font, None).unwrap()
+    }
 }
 
 pub fn create_pdf(
@@ -142,11 +181,12 @@ pub fn create_pdf(
     };
     let has_title_page = fountain_doc.has_title_page();
 
+    let all_chars = fountain_doc.get_all_chars();
     let default_font = FontFamily {
-        regular: get_fontdata("Courier Prime Regular.ttf"),
-        italic: get_fontdata("Courier Prime Italic.ttf"),
-        bold: get_fontdata("Courier Prime Bold.ttf"),
-        bold_italic: get_fontdata("Courier Prime BoldItalic.ttf"),
+        regular: get_fontdata("Courier Prime Regular.ttf", &all_chars),
+        italic: get_fontdata("Courier Prime Italic.ttf", &all_chars),
+        bold: get_fontdata("Courier Prime Bold.ttf", &all_chars),
+        bold_italic: get_fontdata("Courier Prime BoldItalic.ttf", &all_chars),
     };
 
     let mut doc = genpdf::Document::new(default_font);
