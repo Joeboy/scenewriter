@@ -16,7 +16,7 @@ use include_dir::{include_dir, Dir};
 use std::fmt;
 
 static FONTS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/fonts/truetype/Courier Prime");
-const SKIP_FONT_SUBSETTING: bool = true;
+const SKIP_FONT_SUBSETTING: bool = false;
 
 fn inches(inches: f32) -> f32 {
     // return mm
