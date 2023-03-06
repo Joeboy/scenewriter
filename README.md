@@ -5,19 +5,20 @@ and generates PDFs in the [standard screenplay format](https://www.nfi.edu/scree
 It doesn't implement the full Fountain spec yet, and probably has bugs. But it
 seems to kinda mostly work, to the limited extent I've tested it so far.
 
-If you just want to download and run it, see the [releases](https://github.com/Joeboy/farce/releases/tag/v0.0.4).
+If you just want to download and run it, see the [releases](https://github.com/Joeboy/farce/releases/tag/v0.0.5).
 Note that it's still an unfinished / preview release. But for basic scenes,
 it might already do everything you need. Issues that might be offputting are:
 
 * Full Fountain spec is not yet implemented
-* Generated PDFs embed the entire Courier Prime font, in four variants. Which makes the PDFs quite large (like 400kB)
+* Only really tested with straightforward UTF8 / ASCII encoded documents,
+  probably won't handle weirder encodings well
 * Title page is very basic - eg. no contact details
 
 Here's direct links to the
-[Windows](https://github.com/Joeboy/farce/releases/download/v0.0.4/farce_v0.0.4_x86_64-pc-windows-gnu.zip),
-[Mac](https://github.com/Joeboy/farce/releases/download/v0.0.4/farce_v0.0.4_x86_64-apple-darwin.zip)
+[Windows](https://github.com/Joeboy/farce/releases/download/v0.0.5/farce_v0.0.5_x86_64-pc-windows-gnu.zip),
+[Mac](https://github.com/Joeboy/farce/releases/download/v0.0.5/farce_v0.0.5_x86_64-apple-darwin.zip)
 and
-[Linux](https://github.com/Joeboy/farce/releases/download/v0.0.4/farce_v0.0.4_x86_64-unknown-linux-musl.tar.gz)
+[Linux](https://github.com/Joeboy/farce/releases/download/v0.0.5/farce_v0.0.5_x86_64-unknown-linux-musl.tar.gz)
 versions.
 
 [Here](https://fountain.io/_downloads/Big%20Fish.pdf)'s the reference version
