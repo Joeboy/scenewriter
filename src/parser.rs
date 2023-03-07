@@ -114,7 +114,7 @@ fn parse_page_break(input: &str) -> IResult<&str, FarceElement> {
     Ok((remainder, FarceElement::FPageBreak))
 }
 
-fn parse_element(input: &str) -> IResult<&str, FarceElement> {
+pub fn parse_element(input: &str) -> IResult<&str, FarceElement> {
     let (remainder, element) = alt((
         parse_scene_heading,
         parse_dialogue,
