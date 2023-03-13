@@ -47,7 +47,7 @@ pub fn fountain_to_pdf(input: &str, paper_size: pdf::PaperSize) -> Vec<u8> {
 pub fn fountain_to_html(input: &str) -> String {
     let (_remainder, fdoc) = parser::parse_fountain(input).expect("Could not parse fountain doc");
     let mut writer = MyWriter::new();
-    html::write_html(fdoc, &mut writer).expect("Failed to write html");
+    html::write_html(fdoc, &mut writer, false).expect("Failed to write html");
     let bytes = writer.into_inner();
     String::from_utf8(bytes).expect("Could not decode html as utf8")
 }

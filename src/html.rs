@@ -41,14 +41,22 @@ fn write_title_page(title_page: &TitlePage, w: &mut impl Write) {
     w.write(b"</div>").unwrap();
 }
 
-pub fn write_html(document: FarceDocument, mut w: impl Write) -> Result<(), String> {
-    w.write(HTML_HEADER).unwrap();
+pub fn write_html(
+    document: FarceDocument,
+    mut w: impl Write,
+    include_header_and_footer: bool,
+) -> Result<(), String> {
+    if include_header_and_footer {
+        w.write(HTML_HEADER).unwrap();
+    }
     if let Some(ref title_page) = document.title_page {
         write_title_page(title_page, &mut w);
     }
     for element in &document.elements {
         w.write(element.as_html().as_bytes()).unwrap();
     }
-    w.write(HTML_FOOTER).unwrap();
+    if include_header_and_footer {
+        w.write(HTML_FOOTER).unwrap();
+    }
     Ok(())
 }

@@ -220,7 +220,7 @@ fn main() {
                     "Could not open file {} for writing",
                     output_filename.unwrap()
                 ));
-                write_html(document, f).unwrap();
+                write_html(document, f, true).unwrap();
             }
             OutputMode::Stats => {
                 print_stats(&document);
