@@ -183,6 +183,6 @@ mod tests {
             parse_dialogue("FRED (ABC) (EFG)\nHere's some **bold**, *italicized*, ***bold-italicized***  and _underlined_ dialogue\n").unwrap();
         assert_eq!(remainder, "");
         let html = dialogue.as_html();
-        assert_eq!(html, "<div class=\"element-dialogue\">\n<p>FRED  (ABC) (EFG)</p>\n<p>Here's some <b>bold</b>, <i>italicized</i>, <b>bold-italicized</b>  and <u>underlined</u> dialogue</p>\n</div>\n\n")
+        assert_eq!(html, "<div class=\"element-dialogue\">\n<p>FRED (ABC) (EFG)</p>\n<p>Here's some <b>bold</b>, <i>italicized</i>, <b>bold-italicized</b>  and <u>underlined</u> dialogue</p>\n</div>\n\n")
     }
 }
