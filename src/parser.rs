@@ -3,7 +3,9 @@ use crate::document::*;
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_while, take_while1, take_while_m_n},
-    character::complete::{char, line_ending, multispace0, not_line_ending, space0, space1},
+    character::complete::{
+        alphanumeric1, char, line_ending, multispace0, not_line_ending, space0, space1,
+    },
     combinator::{eof, map, opt},
     multi::{many0, many1},
     sequence::{delimited, pair, separated_pair, terminated},
@@ -22,6 +24,12 @@ fn eol_or_eof(input: &str) -> IResult<&str, &str> {
 fn nonempty_line(input: &str) -> IResult<&str, &str> {
     let (i, line) = one_or_more_non_newline_chars(input)?;
     eol_or_eof(i)?;
+    if line.trim() == "" {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Space
+        )));
+    }
     Ok((i, line))
 }
 
@@ -59,6 +67,7 @@ fn parse_character_extension(input: &str) -> IResult<&str, &str> {
 
 fn parse_character_name(input: &str) -> IResult<&str, (&str, Vec<&str>)> {
     let (i, name) = take_while(|c: char| is_character_name_char(c))(input)?;
+    let (_, _) = alphanumeric1(name)?;
     let (i, _whitespace) = space0(i)?;
     let (i, extensions) = many0(parse_character_extension)(i)?;
     Ok((i, (name.trim(), extensions)))
@@ -76,10 +85,8 @@ fn parse_dialogue(input: &str) -> IResult<&str, FarceElement> {
 }
 
 fn parse_action(input: &str) -> IResult<&str, FarceElement> {
-    let (remainder, lines) = many1(terminated(
-        take_while1(|c| c != '\r' && c != '\n'), // Not sure why not_newline doesn't work here?
-        eol_or_eof,
-    ))(input)?;
+    let (remainder, lines) = many1(terminated(nonempty_line, opt(line_ending)))(input)?;
+
     Ok((
         remainder,
         FarceElement::FAction(Action {
@@ -127,7 +134,7 @@ pub fn parse_element(input: &str) -> IResult<&str, FarceElement> {
 }
 
 pub fn parse_elements(input: &str) -> IResult<&str, Vec<FarceElement>> {
-    many1(parse_element)(input)
+    many0(parse_element)(input)
 }
 
 fn parse_multiline_titlepage_field_key(input: &str) -> IResult<&str, &str> {

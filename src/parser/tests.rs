@@ -119,6 +119,26 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_empty_document() {
+        let input = String::from("");
+        let result = parse_fountain(input.as_str());
+        let (_, document) = result.unwrap();
+        let title_page = document.title_page;
+        assert!(title_page.is_none());
+        assert_eq!(document.elements.len(), 0);
+    }
+
+    #[test]
+    fn test_parse_whitespace_document() {
+        let input = String::from(" \n\n ");
+        let result = parse_fountain(input.as_str());
+        let (_, document) = result.unwrap();
+        let title_page = document.title_page;
+        assert!(title_page.is_none());
+        assert_eq!(document.elements.len(), 0);
+    }
+
+    #[test]
     fn test_parse_document() {
         let input = format!("{}\n\n{}", TITLE_PAGE, ELEMENTS);
         let result = parse_fountain(input.as_str());
