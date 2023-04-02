@@ -51,7 +51,7 @@ impl fmt::Display for OutputMode {
 
 fn print_usage() {
     println!();
-    println!("Usage: farce [..options..] input_filename");
+    println!("Usage: scenewriter [..options..] input_filename");
     println!();
     println!("Options:");
     println!();
@@ -72,10 +72,10 @@ fn print_usage() {
     println!();
     println!();
     println!(
-        "      Eg: farce --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain"
+        "      Eg: scenewriter --a4 --pdf -o \"My Screenplay final-v23.pdf\" my_screenplay.fountain"
     );
     println!();
-    println!(" or just: farce my_screenplay.fountain");
+    println!(" or just: scenewriter my_screenplay.fountain");
     println!();
     exit(1)
 }

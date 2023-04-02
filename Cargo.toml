@@ -1,11 +1,11 @@
 [package]
-name = "farce"
+name = "scenewriter"
 authors = ["Joe Button"]
-version = "0.0.1"
+version = "0.0.7"
 edition = "2021"
 description = "Convert fountain files into screenplay PDFs or HTML"
 readme = "README.md"
-repository = "https://github.com/Joeboy/farce"
+repository = "https://github.com/Joeboy/scenewriter"
 licence = "MIT"
 keywords = ["fountain", "screenplay", "screenwriting"]
 categories = ["command-line-utilities", "parser-implementations"]
