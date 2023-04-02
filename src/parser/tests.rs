@@ -119,6 +119,24 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_with_leading_whitespace() {
+        let elements = String::from(" \n") + ELEMENTS;
+        let result = parse_elements(&elements);
+        let (remainder, elements) = result.unwrap();
+        assert_eq!(elements.len(), 5);
+        assert_eq!(remainder, "");
+    }
+
+    #[test]
+    fn test_parse_with_trailing_whitespace() {
+        let elements = ELEMENTS.to_owned() + " \n";
+        let result = parse_elements(&elements);
+        let (remainder, elements) = result.unwrap();
+        assert_eq!(elements.len(), 5);
+        assert_eq!(remainder, "");
+    }
+
+    #[test]
     fn test_parse_empty_document() {
         let input = String::from("");
         let result = parse_fountain(input.as_str());

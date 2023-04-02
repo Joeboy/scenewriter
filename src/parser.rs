@@ -134,7 +134,7 @@ pub fn parse_element(input: &str) -> IResult<&str, FarceElement> {
 }
 
 pub fn parse_elements(input: &str) -> IResult<&str, Vec<FarceElement>> {
-    many0(parse_element)(input)
+    many0(parse_element)(input.trim())
 }
 
 fn parse_multiline_titlepage_field_key(input: &str) -> IResult<&str, &str> {
