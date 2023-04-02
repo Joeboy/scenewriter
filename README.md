@@ -64,3 +64,9 @@ the current priorities.
     or just: scenewriter my_screenplay.fountain
 
 (if you're using the Windows version it'll be `scenewriter.exe`).
+
+
+### Python bindings
+
+If you want to call scenewriter code from python, there are very rudimentary bindings
+[here](https://github.com/Joeboy/pyscenewriter).
