@@ -21,7 +21,7 @@ and
 [Linux](https://github.com/Joeboy/scenewriter/releases/download/v0.0.7/scenewriter_v0.0.7_x86_64-unknown-linux-musl.tar.gz)
 versions.
 
-[Here](https://fountain.io/_downloads/Big%20Fish.pdf)'s the reference version
+[Here](https://fountain.io/_downloads/Big-Fish.pdf)'s the reference version
 of the John August's Big Fish screenplay from fountain.io, and [here](./samples/Big-Fish.pdf)'s
 Scenewriter's effort at formatting the same [fountain file](https://fountain.io/_downloads/Big-Fish.fountain).
 It's in the ballpark, but not 100% there yet. For the even less polished HTML
